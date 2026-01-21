@@ -1,8 +1,12 @@
 'use client';
 
 import Link from "next/link";
+import { useAppSelector } from "@/lib/hooks";
+import { UserDropdown } from "./UserDropdown";
 
 export function Header() {
+  const { isAuthenticated, loading } = useAppSelector((state) => state.auth);
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/95 backdrop-blur-sm border-b border-white/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -38,14 +42,22 @@ export function Header() {
             </Link>
           </nav>
 
-          {/* CTA Button */}
+          {/* CTA Button or User Dropdown */}
           <div className="flex items-center gap-4">
-            <Link 
-              href="#iniciar" 
-              className="px-6 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg text-sm font-medium text-white transition-all glow-blue"
-            >
-              Comenzar ahora
-            </Link>
+            {!loading && (
+              <>
+                {isAuthenticated ? (
+                  <UserDropdown />
+                ) : (
+                  <Link 
+                    href="/login" 
+                    className="px-6 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg text-sm font-medium text-white transition-all glow-blue"
+                  >
+                    Comenzar ahora
+                  </Link>
+                )}
+              </>
+            )}
           </div>
         </div>
       </div>

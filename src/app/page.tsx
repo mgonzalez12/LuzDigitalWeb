@@ -8,8 +8,15 @@ import { GentleReminder } from "@/components/GentleReminder";
 import { FocusMode } from "@/components/FocusMode";
 import { ProgressIndicator } from "@/components/ProgressIndicator";
 import { BibleVersionsSection } from "@/components/BibleVersionsSection";
+import { useAppSelector } from "@/lib/hooks";
 
 export default function Home() {
+  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  
+  // Verificar si el email está confirmado
+  const isEmailVerified = user?.email_confirmed_at !== null && user?.email_confirmed_at !== undefined;
+  const showProtectedContent = isAuthenticated && isEmailVerified;
+
   return (
     <div className="min-h-screen bg-white dark:bg-[#0a0a0a] text-slate-900 dark:text-white transition-colors">
       <Header />
@@ -52,36 +59,38 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Tu Viaje Espiritual Section */}
-      <section className="py-16 md:py-24 bg-slate-50 dark:bg-zinc-950/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-12 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-2">Tu Viaje Espiritual</h2>
-            <p className="text-slate-600 dark:text-gray-400">Herramientas diseñadas para acompañarte sin presión</p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            {/* Versículo del Día - ocupa todo el ancho en móvil, mitad en desktop */}
-            <div className="lg:col-span-2">
-              <DailyVerse />
+      {/* Tu Viaje Espiritual Section - Solo para usuarios autenticados y verificados */}
+      {showProtectedContent && (
+        <section className="py-16 md:py-24 bg-slate-50 dark:bg-zinc-950/50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="mb-12 text-center">
+              <h2 className="text-3xl md:text-4xl font-bold mb-2">Tu Viaje Espiritual</h2>
+              <p className="text-slate-600 dark:text-gray-400">Herramientas diseñadas para acompañarte sin presión</p>
             </div>
 
-            {/* Racha de Lectura */}
-            <ReadingStreak />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+              {/* Versículo del Día - ocupa todo el ancho en móvil, mitad en desktop */}
+              <div className="lg:col-span-2">
+                <DailyVerse />
+              </div>
 
-            {/* Indicador de Progreso Tranquilo */}
-            <ProgressIndicator />
+              {/* Racha de Lectura */}
+              <ReadingStreak />
 
-            {/* Recordatorio Suave */}
-            <GentleReminder />
+              {/* Indicador de Progreso Tranquilo */}
+              <ProgressIndicator />
 
-            {/* Modo de Concentración - ocupa todo el ancho */}
-            <div className="lg:col-span-2">
-              <FocusMode />
+              {/* Recordatorio Suave */}
+              <GentleReminder />
+
+              {/* Modo de Concentración - ocupa todo el ancho */}
+              <div className="lg:col-span-2">
+                <FocusMode />
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Bible Versions Section */}
       <BibleVersionsSection />
@@ -181,7 +190,7 @@ export default function Home() {
                   </svg>
                 </a>
               </div>
-              <p className="text-xs text-slate-500 dark:text-gray-500">© 2024 Luz Digital. Hecho con fe y código abierto.</p>
+              <p className="text-xs text-slate-500 dark:text-gray-500">© 2026 Luz Digital. Hecho con fe y código abierto.</p>
             </div>
 
             {/* Plataforma column */}

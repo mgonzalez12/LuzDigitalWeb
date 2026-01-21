@@ -3,6 +3,7 @@ import bibleVersionsReducer from './features/bibleVersionsSlice';
 import bibleBooksReducer from './features/bibleBooksSlice';
 import bibleChapterReducer from './features/bibleChapterSlice';
 import bibleVersesReducer from './features/bibleVersesSlice';
+import authReducer from './features/authSlice';
 
 export const makeStore = () => {
   return configureStore({
@@ -11,6 +12,7 @@ export const makeStore = () => {
       bibleBooks: bibleBooksReducer,
       bibleChapter: bibleChapterReducer,
       bibleVerses: bibleVersesReducer,
+      auth: authReducer,
     },
   });
 };
