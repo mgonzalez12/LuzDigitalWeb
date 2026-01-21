@@ -312,4 +312,4 @@ Este proyecto es open-source. Hecho con fe y código abierto.
 
 ---
 
-**© 2024 Luz Digital** - Llevando la espiritualidad al próximo nivel digital.
+**© 2026 Luz Digital** - Llevando la espiritualidad al próximo nivel digital.

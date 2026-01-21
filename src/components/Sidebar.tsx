@@ -2,11 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { VersionSelectorModal } from './VersionSelectorModal';
+import { useAppDispatch, useAppSelector } from '@/lib/hooks';
+import { logout } from '@/lib/features/authSlice';
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
   const [isLibraryModalOpen, setIsLibraryModalOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -26,6 +31,13 @@ export function Sidebar() {
       document.body.style.overflow = 'unset';
     };
   }, [isOpen]);
+
+  // Función para cerrar sesión
+  const handleLogout = async () => {
+    await dispatch(logout());
+    setIsOpen(false);
+    router.push('/login');
+  };
 
   const navItems = [
     { href: '/', label: 'Inicio', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
@@ -61,14 +73,31 @@ export function Sidebar() {
       )}
 
       {/* Sidebar */}
-      <aside className={`
-        fixed left-0 top-0 h-screen w-64 bg-slate-900 dark:bg-zinc-950 border-r border-slate-800 dark:border-zinc-800 flex flex-col z-40
-        transition-transform duration-300 ease-in-out
-        lg:translate-x-0
-        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-      `}>
+      <aside 
+        className={`
+          fixed left-0 top-0 h-screen w-64 flex flex-col z-40
+          transition-transform duration-300 ease-in-out
+          lg:translate-x-0
+          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}
+        style={{
+          background: 'linear-gradient(to bottom, #1e293b, #0f172a)',
+          backgroundImage: `
+            linear-gradient(to bottom, #1e293b, #0f172a),
+            repeating-linear-gradient(
+              90deg,
+              transparent,
+              transparent 2px,
+              rgba(30, 41, 59, 0.4) 2px,
+              rgba(30, 41, 59, 0.4) 4px
+            )
+          `,
+          backgroundBlendMode: 'normal',
+          borderRight: '1px solid rgba(30, 41, 59, 0.5)'
+        }}
+      >
         {/* Logo */}
-        <div className="p-6 border-b border-slate-800 dark:border-zinc-800">
+        <div className="p-6 border-b border-slate-700/50">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="w-8 h-8 flex items-center justify-center">
               <svg viewBox="0 0 24 24" fill="none" className="w-full h-full text-blue-500">
@@ -144,21 +173,21 @@ export function Sidebar() {
       />
 
         {/* Plan de Lectura */}
-        <div className="px-6 py-4 border-t border-slate-800 dark:border-zinc-800">
+        <div className="px-6 py-4 border-t border-slate-700/50">
           <div className="mb-3">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-medium text-slate-400">Plan de Lectura</span>
               <span className="text-xs font-bold text-blue-500">85%</span>
             </div>
-            <div className="h-2 bg-slate-800 dark:bg-zinc-800 rounded-full overflow-hidden">
-              <div className="h-full bg-blue-500 rounded-full" style={{ width: '85%' }}></div>
+            <div className="h-2 bg-slate-800/60 rounded-full overflow-hidden">
+              <div className="h-full bg-blue-500 rounded-full shadow-lg shadow-blue-500/50" style={{ width: '85%' }}></div>
             </div>
           </div>
           <p className="text-sm text-white font-medium">Camino de Sabiduría</p>
         </div>
 
-        {/* Configuración */}
-        <div className="px-3 pb-6">
+        {/* Configuración y Cerrar Sesión */}
+        <div className="px-3 pb-6 space-y-2">
           <Link
             href="/configuracion"
             className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 dark:hover:bg-zinc-800/50 transition-all"
@@ -169,6 +198,19 @@ export function Sidebar() {
             </svg>
             <span className="text-sm font-medium">Configuración</span>
           </Link>
+
+          {/* Cerrar Sesión - Solo visible si está autenticado */}
+          {isAuthenticated && (
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-900/20 transition-all"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              <span className="text-sm font-medium">Cerrar Sesión</span>
+            </button>
+          )}
         </div>
       </aside>
     </>

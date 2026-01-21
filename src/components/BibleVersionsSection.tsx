@@ -34,6 +34,17 @@ const versionGradients = [
   },
 ];
 
+// Imágenes estáticas para los cards (por orden en `versions`)
+// RV1960, RV1995, NVI (si el orden cambia, ajustar este arreglo).
+const versionImagesByIndex: Array<string | undefined> = [
+  'https://hkpftjxmpmqsuzdxgswm.supabase.co/storage/v1/object/public/LuzDigital/biblia_reina_1960_moderna.png',
+  'https://hkpftjxmpmqsuzdxgswm.supabase.co/storage/v1/object/public/LuzDigital/biblia_reina_1995.png',
+  'https://hkpftjxmpmqsuzdxgswm.supabase.co/storage/v1/object/public/LuzDigital/biblia_nueva_version_internacional.png',
+  'https://hkpftjxmpmqsuzdxgswm.supabase.co/storage/v1/object/public/LuzDigital/biblia_Dios_habla_hoy.png',
+  'https://hkpftjxmpmqsuzdxgswm.supabase.co/storage/v1/object/public/LuzDigital/biblia_palabra_de_Dios_para_Todos.png',
+  'https://hkpftjxmpmqsuzdxgswm.supabase.co/storage/v1/object/public/LuzDigital/biblia_King_James_Version.png'
+];
+
 export function BibleVersionsSection() {
   const dispatch = useAppDispatch();
   const { versions, loading, error } = useAppSelector((state) => state.bibleVersions);
@@ -97,6 +108,7 @@ export function BibleVersionsSection() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {versions.map((version, index) => {
             const gradient = versionGradients[index % versionGradients.length];
+            const imageUrl = versionImagesByIndex[index];
             
             return (
               <Link
@@ -104,9 +116,21 @@ export function BibleVersionsSection() {
                 href={`/version/${version.version}`}
                 className="group card-hover rounded-2xl overflow-hidden bg-white dark:bg-zinc-900/50 border border-slate-200 dark:border-zinc-800/50 shadow-sm block"
               >
-                {/* Image area with gradient placeholder */}
-                <div className={`relative h-64 bg-gradient-to-br ${gradient.bg} overflow-hidden`}>
-                  <div className={`absolute inset-0 bg-gradient-to-br ${gradient.overlay}`}></div>
+                {/* Image area (imagen o gradiente fallback) */}
+                <div className="relative h-64 overflow-hidden bg-zinc-900">
+                  {imageUrl ? (
+                    <div
+                      className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-[1.03]"
+                      style={{ backgroundImage: `url(${imageUrl})` }}
+                    />
+                  ) : (
+                    <div className={`absolute inset-0 bg-gradient-to-br ${gradient.bg}`} />
+                  )}
+
+                  {/* Overlay para legibilidad */}
+                  <div className={`absolute inset-0 bg-gradient-to-br ${gradient.overlay}`} />
+                  <div className="absolute inset-0 bg-black/20" />
+
                   <div className="absolute bottom-4 left-4">
                     <span className="px-3 py-1 bg-blue-500/80 backdrop-blur-sm rounded-full text-xs font-medium text-white uppercase">
                       {version.version}
