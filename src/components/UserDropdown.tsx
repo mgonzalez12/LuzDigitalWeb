@@ -11,6 +11,7 @@ export function UserDropdown() {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
   const [isOpen, setIsOpen] = useState(false);
+  const [avatarFailed, setAvatarFailed] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Cerrar dropdown al hacer click fuera
@@ -47,6 +48,21 @@ export function UserDropdown() {
   const userName = user.user_metadata?.name || 'Usuario';
   const userEmail = user.email || '';
 
+  const isGoogleUser =
+    user.app_metadata?.provider === 'google' ||
+    user.identities?.some((identity) => identity.provider === 'google') ||
+    false;
+
+  // Supabase (Google OAuth) suele traer `avatar_url` o `picture` en user_metadata
+  const meta = user.user_metadata as Record<string, unknown> | undefined;
+  const avatarUrlCandidate =
+    (typeof meta?.avatar_url === 'string' && meta.avatar_url) ||
+    (typeof meta?.picture === 'string' && meta.picture) ||
+    (typeof meta?.avatar === 'string' && meta.avatar) ||
+    null;
+
+  const avatarUrl = isGoogleUser && !avatarFailed ? avatarUrlCandidate : null;
+
   return (
     <div className="relative" ref={dropdownRef}>
       {/* Avatar Button */}
@@ -54,9 +70,19 @@ export function UserDropdown() {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 p-1 rounded-full hover:ring-2 hover:ring-blue-500/50 transition-all"
       >
-        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
-          {getInitials()}
-        </div>
+        {avatarUrl ? (
+          <img
+            src={avatarUrl}
+            alt={userName}
+            referrerPolicy="no-referrer"
+            onError={() => setAvatarFailed(true)}
+            className="w-10 h-10 rounded-full object-cover"
+          />
+        ) : (
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
+            {getInitials()}
+          </div>
+        )}
       </button>
 
       {/* Dropdown Menu */}
@@ -65,9 +91,19 @@ export function UserDropdown() {
           {/* User Info */}
           <div className="p-4 border-b border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
-                {getInitials()}
-              </div>
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt={userName}
+                  referrerPolicy="no-referrer"
+                  onError={() => setAvatarFailed(true)}
+                  className="w-12 h-12 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
+                  {getInitials()}
+                </div>
+              )}
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-slate-900 dark:text-white truncate">
                   {userName}

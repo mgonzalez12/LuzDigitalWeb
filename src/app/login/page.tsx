@@ -18,7 +18,7 @@ export default function LoginPage() {
   // Redirigir si ya está autenticado
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/');
+      router.push('/dashboard');
     }
   }, [isAuthenticated, router]);
 
@@ -38,7 +38,7 @@ export default function LoginPage() {
 
     try {
       await dispatch(loginWithEmail({ email, password })).unwrap();
-      router.push('/');
+      router.push('/dashboard');
     } catch (err) {
       // Error manejado por Redux
       console.error('Login error:', err);

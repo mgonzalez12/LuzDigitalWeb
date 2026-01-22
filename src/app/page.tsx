@@ -1,3 +1,5 @@
+
+
 'use client';
 
 import Link from "next/link";
@@ -12,7 +14,7 @@ import { useAppSelector } from "@/lib/hooks";
 
 export default function Home() {
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
-  
+
   // Verificar si el email está confirmado
   const isEmailVerified = user?.email_confirmed_at !== null && user?.email_confirmed_at !== undefined;
   const showProtectedContent = isAuthenticated && isEmailVerified;
@@ -26,7 +28,7 @@ export default function Home() {
         {/* Gradient background */}
         <div className="absolute inset-0 bg-gradient-to-b from-blue-100/30 via-blue-50/20 to-transparent dark:from-blue-950/20 dark:via-blue-900/10 dark:to-transparent"></div>
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-3xl"></div>
-        
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center text-center">
             {/* Version badge */}
@@ -42,14 +44,14 @@ export default function Home() {
 
             {/* Subtitle */}
             <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-gray-400 max-w-3xl mb-10 md:mb-12 px-4">
-              Una experiencia digital moderna y open-source para el cristiano contemporáneo. 
+              Una experiencia digital moderna y open-source para el cristiano contemporáneo.
               Sumérgete en la espiritualidad con diseño de alta tecnología.
             </p>
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto px-4">
-              <Link 
-                href="#lectura" 
+              <Link
+                href="#lectura"
                 className="px-8 py-4 bg-blue-500 hover:bg-blue-600 rounded-xl text-base font-semibold text-white transition-all glow-blue-strong"
               >
                 Iniciar Lectura

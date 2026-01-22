@@ -14,5 +14,5 @@ export async function GET(request: Request) {
   }
 
   // Redirigir al home después del login exitoso
-  return NextResponse.redirect(new URL('/', requestUrl.origin));
+  return NextResponse.redirect(new URL('/dashboard', requestUrl.origin));
 }
