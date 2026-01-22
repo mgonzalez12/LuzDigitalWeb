@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
+import { AchievementsSection } from "@/components/AchievementsSection";
 import { useAppSelector } from "@/lib/hooks";
 import { supabase } from "@/lib/supabase";
 
@@ -130,17 +131,6 @@ function DashboardHome() {
     return Math.round((chaptersRead / totalChapters) * 1000) / 10;
   }, [chaptersRead, totalChapters]);
 
-  const achievements = useMemo(() => {
-    const defs = [
-      { id: "first", title: "Primera Lectura", desc: "Completa tu primer capítulo", unlocked: chaptersRead >= 1, color: "slate" },
-      { id: "week", title: "Semana de Fuego", desc: "7 días consecutivos leyendo", unlocked: streak >= 7, color: "blue" },
-      { id: "month", title: "Mes Imparable", desc: "30 días consecutivos leyendo", unlocked: streak >= 30, color: "purple" },
-      { id: "collector", title: "Coleccionista", desc: "Guarda 100 versículos", unlocked: bookmarksCount >= 100, color: "amber" },
-      { id: "disciplined", title: "Disciplinado", desc: "Cumple tu meta diaria 50 veces", unlocked: activeDays >= 50, color: "blue" },
-    ] as const;
-    const unlocked = defs.filter((d) => d.unlocked).length;
-    return { defs, unlocked, total: defs.length };
-  }, [chaptersRead, streak, bookmarksCount, activeDays]);
 
   const nextReading = useMemo(() => {
     // fallback
@@ -446,8 +436,8 @@ function DashboardHome() {
                   <div className="text-sm text-slate-300">Logros</div>
                   <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">🏆</div>
                 </div>
-                <div className="text-4xl font-bold mt-3">{achievements.unlocked}</div>
-                <div className="text-xs text-slate-400">de {achievements.total} disponibles</div>
+                <div className="text-4xl font-bold mt-3">-</div>
+                <div className="text-xs text-slate-400">Ver sección de logros</div>
               </div>
               <div className="bg-slate-900/35 border border-slate-800/60 rounded-2xl p-6">
                 <div className="flex items-center justify-between">
@@ -462,23 +452,7 @@ function DashboardHome() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
             {/* Logros */}
-            <section className="lg:col-span-2 bg-slate-900/35 border border-slate-800/60 rounded-3xl p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h3 className="text-xl font-semibold">Logros</h3>
-                  <p className="text-sm text-slate-400">{achievements.unlocked} de {achievements.total} desbloqueados</p>
-                </div>
-                <div className="w-11 h-11 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">👑</div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {achievements.defs.map((a) => (
-                  <div key={a.id} className={`rounded-2xl border p-4 ${a.unlocked ? "border-blue-500/30 bg-blue-500/10" : "border-slate-800/60 bg-slate-950/20 opacity-60"}`}>
-                    <div className="font-semibold">{a.title}</div>
-                    <div className="text-xs text-slate-400 mt-1">{a.desc}</div>
-                  </div>
-                ))}
-              </div>
-            </section>
+            <AchievementsSection />
 
             {/* Camino de Sabiduría + Config rápida */}
             <aside className="space-y-6">
