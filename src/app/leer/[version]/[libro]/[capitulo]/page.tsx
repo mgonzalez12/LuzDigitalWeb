@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Sidebar } from '@/components/Sidebar';
+import { HorizontalNavbar } from '@/components/HorizontalNavbar';
 import { FloatingActions } from '@/components/FloatingActions';
 import { useAppDispatch, useAppSelector } from '@/lib/hooks';
 import { fetchBibleChapter } from '@/lib/features/bibleChapterSlice';
@@ -181,16 +181,16 @@ export default function LeerCapituloPage() {
   // Mostrar skeleton si está cargando O si hay error pero no han pasado 5 segundos
   if (loading || (!currentChapter && !showError)) {
     return (
-      <div className="flex min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950 relative overflow-hidden">
+      <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950 relative overflow-hidden">
         {/* Background decorative elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl"></div>
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl"></div>
         </div>
 
-        <Sidebar />
+        <HorizontalNavbar />
         
-        <main className="flex-1 lg:ml-64 relative z-10">
+        <main className="flex-1 relative z-10 pt-24">
           {/* Top Bar Skeleton */}
           <div className="sticky top-0 z-30 bg-slate-900/80 backdrop-blur-xl border-b border-slate-800/50 px-4 md:px-8 py-4">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
@@ -216,9 +216,9 @@ export default function LeerCapituloPage() {
   // Solo mostrar error después de 5 segundos si realmente falló
   if (showError || !currentChapter) {
     return (
-      <div className="flex min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950 relative overflow-hidden">
-        <Sidebar />
-        <main className="flex-1 lg:ml-64 flex items-center justify-center">
+      <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950 relative overflow-hidden">
+        <HorizontalNavbar />
+        <main className="flex-1 flex items-center justify-center pt-6">
           <div className="text-center text-red-400">
             <p className="text-xl mb-4">Error al cargar el capítulo</p>
             <p className="text-sm mb-6">{error || 'Capítulo no encontrado'}</p>
@@ -285,58 +285,62 @@ export default function LeerCapituloPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950 relative overflow-hidden">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950 relative overflow-hidden">
       {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl"></div>
       </div>
 
-      {/* Sidebar */}
-      <Sidebar />
+      <HorizontalNavbar />
 
       {/* Main Content */}
-      <main className="flex-1 lg:ml-64 relative z-10 pb-32">
-        {/* Top Bar */}
-        <div className="sticky top-0 z-30 bg-slate-900/80 backdrop-blur-xl border-b border-slate-800/50 px-4 md:px-8 py-4">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
-            {/* Breadcrumbs */}
-            <nav className="flex items-center gap-2 text-sm flex-wrap">
-              <Link href="/" className="text-slate-400 hover:text-blue-400">
-                {testament}
-              </Link>
-              <span className="text-slate-600">{'>'}</span>
-              <Link href={`/version/${version}`} className="text-slate-400 hover:text-blue-400 capitalize">
-                {bookName}
-              </Link>
-              <span className="text-slate-600">{'>'}</span>
-              <span className="text-white font-medium">
-                Capítulo {currentChapter.chapter}
-              </span>
-            </nav>
-
-            {/* Actions */}
-            <div className="flex items-center gap-2 md:gap-4 flex-wrap">
-              {/* Streak */}
-              <div className="flex items-center gap-2 px-3 md:px-4 py-2 bg-orange-500/10 border border-orange-500/20 rounded-lg">
-                <svg className="w-4 h-4 text-orange-500" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2c1.658 3.313 3.333 6.667 5 10-1.667 3.333-3.333 6.667-5 10-1.667-3.333-3.333-6.667-5-10 1.667-3.333 3.333-6.667 5-10zm-3 12c0 1.657 1.343 3 3 3s3-1.343 3-3c0-1.104-.897-2-2-2s-2 .896-2 2z"/>
-                </svg>
-                <span className="text-xs md:text-sm font-semibold text-orange-600 whitespace-nowrap">
-                  RACHA {streakDays} Días
+      <main className="flex-1 relative z-10 pb-32 pt-24">
+        <div className="max-w-full md:max-w-5xl lg:max-w-4xl mx-auto px-4 md:px-6 lg:px-8 py-8 md:py-12 space-y-8">
+          {/* Top Bar Card */}
+          <div className="bg-slate-900/35 backdrop-blur-sm border border-slate-800/60 rounded-3xl p-6 md:p-8 relative overflow-hidden">
+            <div
+              className="absolute inset-0 opacity-40 pointer-events-none"
+              style={{
+                backgroundImage:
+                  "radial-gradient(circle at 20% 0%, rgba(245,158,11,0.08), transparent 60%), radial-gradient(circle at 70% 20%, rgba(59,130,246,0.10), transparent 60%)",
+              }}
+            />
+            <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              {/* Breadcrumbs */}
+              <nav className="flex items-center gap-2 text-sm flex-wrap">
+                <Link href="/" className="text-slate-400 hover:text-blue-400">
+                  {testament}
+                </Link>
+                <span className="text-slate-600">{'>'}</span>
+                <Link href={`/version/${version}`} className="text-slate-400 hover:text-blue-400 capitalize">
+                  {bookName}
+                </Link>
+                <span className="text-slate-600">{'>'}</span>
+                <span className="text-white font-medium">
+                  Capítulo {currentChapter.chapter}
                 </span>
-              </div>
+              </nav>
 
-              {/* Share Button */}
-              <button className="px-4 md:px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs md:text-sm font-medium rounded-lg transition-all whitespace-nowrap">
-                Compartir Versículo
-              </button>
+              {/* Actions */}
+              <div className="flex items-center gap-2 md:gap-4 flex-wrap">
+                {/* Streak */}
+                <div className="flex items-center gap-2 px-3 md:px-4 py-2 bg-orange-500/10 border border-orange-500/20 rounded-lg">
+                  <svg className="w-4 h-4 text-orange-500" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2c1.658 3.313 3.333 6.667 5 10-1.667 3.333-3.333 6.667-5 10-1.667-3.333-3.333-6.667-5-10 1.667-3.333 3.333-6.667 5-10zm-3 12c0 1.657 1.343 3 3 3s3-1.343 3-3c0-1.104-.897-2-2-2s-2 .896-2 2z"/>
+                  </svg>
+                  <span className="text-xs md:text-sm font-semibold text-orange-600 whitespace-nowrap">
+                    RACHA {streakDays} Días
+                  </span>
+                </div>
+
+                {/* Share Button */}
+                <button className="px-4 md:px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs md:text-sm font-medium rounded-lg transition-all whitespace-nowrap">
+                  Compartir Versículo
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-
-        {/* Content */}
-        <div className="max-w-full md:max-w-5xl lg:max-w-4xl mx-auto px-4 md:px-6 lg:px-8 py-8 md:py-12 space-y-8">
      
 
           {/* Chapter Title */}
@@ -586,6 +590,33 @@ export default function LeerCapituloPage() {
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Chapter Navigation - Below Info Card */}
+          <div className="flex items-center justify-between mt-6">
+            {currentChapter.chapter > 1 && (
+              <Link
+                href={`/leer/${version}/${libro}/${Number(capitulo) - 1}`}
+                className="flex items-center gap-2 px-4 py-2 bg-slate-800/50 hover:bg-slate-700/50 text-white rounded-lg transition-all"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Capítulo {Number(capitulo) - 1}
+              </Link>
+            )}
+            
+            {currentChapter.chapter < currentChapter.num_chapters && (
+              <Link
+                href={`/leer/${version}/${libro}/${Number(capitulo) + 1}`}
+                className="flex items-center gap-2 px-4 py-2 bg-slate-800/50 hover:bg-slate-700/50 text-white rounded-lg transition-all ml-auto"
+              >
+                Capítulo {Number(capitulo) + 1}
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            )}
           </div>
         </div>
       </main>

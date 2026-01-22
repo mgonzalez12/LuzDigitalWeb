@@ -56,7 +56,7 @@ export function BibleVersionsSection() {
 
   if (loading) {
     return (
-      <section className="py-16 md:py-24">
+      <section id="capitulos" className="py-16 md:py-24 bg-[#0d1420]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section header */}
           <div className="mb-8 md:mb-12">
@@ -72,9 +72,9 @@ export function BibleVersionsSection() {
 
   if (error) {
     return (
-      <section className="py-16 md:py-24">
+      <section id="capitulos" className="py-16 md:py-24 bg-[#0d1420]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center text-red-500">
+          <div className="text-center text-red-400">
             <p>Error al cargar las versiones: {error}</p>
           </div>
         </div>
@@ -83,19 +83,19 @@ export function BibleVersionsSection() {
   }
 
   return (
-    <section className="py-16 md:py-24">
+    <section id="capitulos" className="py-16 md:py-24 bg-[#0d1420]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section header */}
         <div className="flex items-end justify-between mb-8 md:mb-12">
           <div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-2">Versiones de la Biblia</h2>
-            <p className="text-slate-600 dark:text-gray-400">
+            <h2 className="text-3xl md:text-4xl font-bold mb-2 text-white">Versiones de la Biblia</h2>
+            <p className="text-gray-400">
               Explora diferentes traducciones de las Sagradas Escrituras
             </p>
           </div>
           <Link
             href="/busqueda"
-            className="hidden sm:flex items-center gap-2 text-blue-500 hover:text-blue-600 transition-colors"
+            className="hidden sm:flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors"
           >
             <span>Explorar</span>
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -114,7 +114,7 @@ export function BibleVersionsSection() {
               <Link
                 key={version.version}
                 href={`/version/${version.version}`}
-                className="group card-hover rounded-2xl overflow-hidden bg-white dark:bg-zinc-900/50 border border-slate-200 dark:border-zinc-800/50 shadow-sm block"
+                className="group card-hover rounded-2xl overflow-hidden bg-white/5 border border-white/10 hover:border-blue-500/30 shadow-sm block backdrop-blur-sm transition-all"
               >
                 {/* Image area (imagen o gradiente fallback) */}
                 <div className="relative h-64 overflow-hidden bg-zinc-900">
@@ -140,10 +140,10 @@ export function BibleVersionsSection() {
 
                 {/* Text content */}
                 <div className="p-6">
-                  <h3 className="text-2xl font-bold mb-2 group-hover:text-blue-500 transition-colors">
+                  <h3 className="text-2xl font-bold mb-2 text-white group-hover:text-blue-400 transition-colors">
                     {version.name}
                   </h3>
-                  <p className="text-slate-600 dark:text-gray-400">
+                  <p className="text-gray-400">
                     Traducción {version.version.toUpperCase()}
                   </p>
                 </div>
@@ -155,7 +155,7 @@ export function BibleVersionsSection() {
         {/* Empty state */}
         {versions.length === 0 && !loading && (
           <div className="text-center py-12">
-            <p className="text-slate-600 dark:text-gray-400">
+            <p className="text-gray-400">
               No se encontraron versiones de la Biblia.
             </p>
           </div>

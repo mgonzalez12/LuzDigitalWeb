@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Sidebar } from '@/components/Sidebar';
+import { HorizontalNavbar } from '@/components/HorizontalNavbar';
 import { useAppDispatch, useAppSelector } from '@/lib/hooks';
 import { fetchBibleBooks } from '@/lib/features/bibleBooksSlice';
 import { fetchBibleVersions } from '@/lib/features/bibleVersionsSlice';
@@ -97,16 +97,16 @@ export default function BibleLibraryPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950 relative overflow-hidden">
+      <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950 relative overflow-hidden">
         {/* Background decorative elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl"></div>
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl"></div>
         </div>
 
-        <Sidebar />
+        <HorizontalNavbar />
         
-        <main className="flex-1 lg:ml-64 relative z-10">
+        <main className="flex-1 relative z-10 pt-24">
           <div className="px-8 py-12">
             {/* Header skeleton */}
             <div className="mb-12 animate-pulse">
@@ -133,9 +133,9 @@ export default function BibleLibraryPage() {
 
   if (error) {
     return (
-      <div className="flex min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950">
-        <Sidebar />
-        <main className="flex-1 ml-64 flex items-center justify-center">
+      <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950">
+        <HorizontalNavbar />
+        <main className="flex-1 flex items-center justify-center pt-24">
           <div className="text-center text-red-400">
             <p>Error: {error}</p>
             <button
@@ -151,16 +151,16 @@ export default function BibleLibraryPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950 relative overflow-hidden">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950 relative overflow-hidden">
       {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl"></div>
       </div>
 
-      <Sidebar />
+      <HorizontalNavbar />
 
-      <main className="flex-1 lg:ml-64 relative z-10">
+      <main className="flex-1 relative z-10 pt-24">
         {/* Hero Section */}
         <div className="px-4 md:px-6 lg:px-8 py-8 md:py-12 border-b border-slate-800/50">
           <div className="max-w-full lg:max-w-6xl mx-auto">
