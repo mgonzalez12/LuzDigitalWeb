@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { supabase } from '@/lib/supabase';
 
 export interface BibleVersion {
   name: string;
@@ -24,12 +25,26 @@ const initialState: BibleVersionsState = {
 export const fetchBibleVersions = createAsyncThunk(
   'bibleVersions/fetchVersions',
   async () => {
+    // Preferimos Supabase (evita dependencia de endpoint externo).
+    const { data, error } = await supabase
+      .from('bible_versions')
+      .select('code,name')
+      .order('code', { ascending: true });
+
+    if (!error && data && data.length > 0) {
+      return data.map((v: any) => ({
+        name: v.name,
+        version: v.code,
+        uri: '',
+      })) as BibleVersion[];
+    }
+
+    // Fallback: API externa (por compatibilidad si aún no hay tabla sembrada)
     const response = await fetch('https://bible-api.deno.dev/api/versions');
     if (!response.ok) {
       throw new Error('Failed to fetch Bible versions');
     }
-    const data: BibleVersion[] = await response.json();
-    return data;
+    return (await response.json()) as BibleVersion[];
   }
 );
 

@@ -1,27 +1,113 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAppSelector } from '@/lib/hooks';
+import { supabase } from '@/lib/supabase';
 
 export function ReadingStreak() {
   const [streak, setStreak] = useState(0);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [hasReadToday, setHasReadToday] = useState(false);
+  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
-    // Simular carga de racha desde localStorage
-    const savedStreak = localStorage.getItem('readingStreak');
-    if (savedStreak) {
-      setStreak(parseInt(savedStreak, 10));
-    }
-  }, []);
+    let cancelled = false;
 
-  const handleReadToday = () => {
-    const newStreak = streak + 1;
-    setStreak(newStreak);
-    localStorage.setItem('readingStreak', newStreak.toString());
+    const parseDayUtc = (day: string) => new Date(`${day}T00:00:00.000Z`);
+
+    const computeStreakFromDays = (days: Array<{ day: string }>) => {
+      const daySet = new Set(days.map((d) => d.day)); // YYYY-MM-DD
+      // Usamos UTC para alinear con Postgres `current_date` (Supabase corre en UTC).
+      const toKeyUtc = (d: Date) => d.toISOString().slice(0, 10);
+
+      const current = new Date();
+      current.setUTCHours(0, 0, 0, 0);
+      let count = 0;
+
+      while (daySet.has(toKeyUtc(current))) {
+        count += 1;
+        current.setTime(current.getTime() - 86400000);
+      }
+
+      return count;
+    };
+
+    const todayKey = () => {
+      return new Date().toISOString().slice(0, 10);
+    };
+
+    const daysDiffUtc = (a: Date, b: Date) => {
+      const ms = a.getTime() - b.getTime();
+      return Math.floor(ms / 86400000);
+    };
+
+    const load = async () => {
+      if (!isAuthenticated || !user?.id) {
+        if (!cancelled) {
+          setStreak(0);
+          setHasReadToday(false);
+        }
+        return;
+      }
+
+      const { data } = await supabase
+        .from('user_reading_days')
+        .select('day')
+        .eq('user_id', user.id)
+        .order('day', { ascending: false })
+        .limit(60);
+
+      if (cancelled) return;
+      const days = (data ?? []) as Array<{ day: string }>;
+
+      // Si pasaron más de 4 días sin registrar lectura, resetear la racha (borrar registros)
+      if (days.length > 0) {
+        const lastDay = parseDayUtc(days[0].day);
+        const todayUtc = new Date();
+        todayUtc.setUTCHours(0, 0, 0, 0);
+        const diff = daysDiffUtc(todayUtc, lastDay);
+        if (diff > 4) {
+          await supabase.from('user_reading_days').delete().eq('user_id', user.id);
+          if (cancelled) return;
+          setStreak(0);
+          setHasReadToday(false);
+          return;
+        }
+      }
+
+      setStreak(computeStreakFromDays(days));
+      setHasReadToday(new Set(days.map((d) => d.day)).has(todayKey()));
+    };
+
+    load();
+
+    const onUpdated = () => load();
+    window.addEventListener('luz:reading-updated', onUpdated);
+    return () => {
+      cancelled = true;
+      window.removeEventListener('luz:reading-updated', onUpdated);
+    };
+  }, [isAuthenticated, user?.id]);
+
+  const handleReadToday = async () => {
+    if (!isAuthenticated || !user?.id) return;
+    if (hasReadToday) return;
     
     // Mostrar celebración suave
     setShowCelebration(true);
     setTimeout(() => setShowCelebration(false), 3000);
+
+    const day = new Date().toISOString().slice(0, 10);
+
+    // Inserta solo 1 vez por día (PK evita duplicados)
+    await supabase.from('user_reading_days').insert({
+      user_id: user.id,
+      day,
+    });
+
+    setHasReadToday(true);
+    // Refrescar racha (y otros widgets)
+    window.dispatchEvent(new Event('luz:reading-updated'));
   };
 
   return (
@@ -61,9 +147,10 @@ export function ReadingStreak() {
 
         <button
           onClick={handleReadToday}
+          disabled={!isAuthenticated || hasReadToday}
           className="w-full py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-all"
         >
-          Registrar lectura de hoy
+          {hasReadToday ? 'Lectura de hoy registrada' : 'Registrar lectura de hoy'}
         </button>
       </div>
 

@@ -23,7 +23,7 @@ export default function RegistroPage() {
   // Redirigir si ya está autenticado
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/');
+      router.push('/dashboard');
     }
   }, [isAuthenticated, router]);
 

@@ -1,20 +1,57 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useAppSelector } from '@/lib/hooks';
+import { supabase } from '@/lib/supabase';
 
 interface BookProgress {
   name: string;
-  progress: number;
   chapters: number;
   readChapters: number;
+  progress: number;
 }
 
 export function ProgressIndicator() {
-  const [books, setBooks] = useState<BookProgress[]>([
-    { name: 'Génesis', progress: 35, chapters: 50, readChapters: 18 },
-    { name: 'Salmos', progress: 12, chapters: 150, readChapters: 18 },
-    { name: 'Mateo', progress: 67, chapters: 28, readChapters: 19 }
-  ]);
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const [books, setBooks] = useState<BookProgress[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      if (!isAuthenticated) {
+        if (!cancelled) setBooks([]);
+        return;
+      }
+
+      // Trae progreso agregado (view en Supabase). Limitamos a 3 para UI.
+      const { data } = await supabase
+        .from('user_book_progress')
+        .select('book_name, chapter_count, read_chapters, progress_percent')
+        .order('progress_percent', { ascending: false })
+        .limit(3);
+
+      if (cancelled) return;
+
+      setBooks(
+        (data ?? []).map((row: any) => ({
+          name: row.book_name,
+          chapters: row.chapter_count,
+          readChapters: row.read_chapters,
+          progress: Number(row.progress_percent ?? 0),
+        }))
+      );
+    };
+
+    load();
+
+    const onUpdated = () => load();
+    window.addEventListener('luz:reading-updated', onUpdated);
+    return () => {
+      cancelled = true;
+      window.removeEventListener('luz:reading-updated', onUpdated);
+    };
+  }, [isAuthenticated]);
 
   return (
     <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900/50 border border-slate-200 dark:border-zinc-800/50 shadow-sm">
@@ -31,7 +68,8 @@ export function ProgressIndicator() {
       </div>
 
       <div className="space-y-4">
-        {books.map((book) => (
+        {books.length > 0 ? (
+          books.map((book) => (
           <div key={book.name} className="space-y-2">
             <div className="flex items-center justify-between text-sm">
               <span className="font-medium text-slate-900 dark:text-white">{book.name}</span>
@@ -48,14 +86,22 @@ export function ProgressIndicator() {
               </div>
             </div>
           </div>
-        ))}
+          ))
+        ) : (
+          <div className="text-sm text-slate-600 dark:text-gray-400">
+            Lee un capítulo para empezar a ver tu progreso.
+          </div>
+        )}
       </div>
 
       <div className="mt-6 pt-6 border-t border-slate-200 dark:border-zinc-800">
         <div className="flex items-center justify-between">
           <span className="text-sm text-slate-600 dark:text-gray-400">Progreso general</span>
           <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
-            {Math.round(books.reduce((acc, book) => acc + book.progress, 0) / books.length)}%
+            {books.length > 0
+              ? Math.round(books.reduce((acc, book) => acc + book.progress, 0) / books.length)
+              : 0}
+            %
           </span>
         </div>
         <p className="text-xs text-slate-500 dark:text-gray-500 mt-2">
