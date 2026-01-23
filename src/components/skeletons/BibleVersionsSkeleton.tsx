@@ -4,7 +4,7 @@ export function BibleVersionsSkeleton() {
       {[1, 2, 3, 4, 5, 6].map((i) => (
         <div
           key={i}
-          className="group bg-slate-900/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50 animate-pulse"
+          className="group bg-slate-900/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50 hover:border-blue-500/50 transition-all animate-pulse"
         >
           {/* Image placeholder */}
           <div className="relative mb-4 aspect-[4/3] bg-gradient-to-br from-slate-700/50 to-slate-800/50 rounded-lg overflow-hidden">

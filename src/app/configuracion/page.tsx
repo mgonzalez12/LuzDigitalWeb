@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Sidebar } from '@/components/Sidebar';
+import { HorizontalNavbar } from '@/components/HorizontalNavbar';
 import { useAppSelector } from '@/lib/hooks';
 
 export default function ConfiguracionPage() {
@@ -22,15 +22,15 @@ export default function ConfiguracionPage() {
     }
   }, [loading, isAuthenticated, router]);
 
-  if (loading || (!isAuthenticated && typeof window !== 'undefined')) {
+  if (loading) {
     return (
-      <div className="flex min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950 relative overflow-hidden">
+      <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950 relative overflow-hidden">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl"></div>
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl"></div>
         </div>
-        <Sidebar />
-        <main className="flex-1 lg:ml-64 relative z-10 flex items-center justify-center px-4 py-20">
+        <HorizontalNavbar />
+        <main className="flex-1 relative z-10 flex items-center justify-center px-4 py-20 pt-24">
           <div className="w-full max-w-xl bg-slate-900/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 animate-pulse">
             <div className="h-8 bg-slate-700/40 rounded-lg w-56 mb-3"></div>
             <div className="h-5 bg-slate-700/20 rounded-lg w-96 mb-8"></div>
@@ -42,34 +42,39 @@ export default function ConfiguracionPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950 relative overflow-hidden">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950 relative overflow-hidden">
       {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl"></div>
       </div>
 
-      <Sidebar />
+      <HorizontalNavbar />
 
-      <main className="flex-1 lg:ml-64 relative z-10 px-4 md:px-6 lg:px-10 py-10 md:py-14">
+      <main className="flex-1 relative z-10 px-4 md:px-6 lg:px-10 py-10 md:py-14 pt-24 pb-20">
         <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="flex items-start gap-4 mb-10">
-            <button
-              onClick={() => router.back()}
-              className="mt-1 text-slate-300 hover:text-white transition-colors inline-flex items-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              Volver
-            </button>
-
-            <div className="flex-1">
-              <h1 className="text-4xl md:text-5xl font-bold text-white">Configuración de IA</h1>
-              <p className="text-slate-400 mt-2">
-                Configura tus API keys para servicios de IA personalizados
-              </p>
+          {/* Header Card */}
+          <div className="bg-slate-900/35 backdrop-blur-sm border border-slate-800/60 rounded-3xl p-8 mb-10 relative overflow-hidden">
+            <div
+              className="absolute inset-0 opacity-40 pointer-events-none"
+              style={{
+                backgroundImage:
+                  "radial-gradient(circle at 20% 0%, rgba(245,158,11,0.08), transparent 60%), radial-gradient(circle at 70% 20%, rgba(59,130,246,0.10), transparent 60%)",
+              }}
+            />
+            <div className="relative flex items-center gap-5">
+              <div className="w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-300">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h1 className="text-2xl font-bold text-white">Configuración de IA</h1>
+                <p className="text-slate-400">
+                  Configura tus API keys para servicios de IA personalizados
+                </p>
+              </div>
             </div>
           </div>
 

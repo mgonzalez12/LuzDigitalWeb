@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Sidebar } from '@/components/Sidebar';
+import { HorizontalNavbar } from '@/components/HorizontalNavbar';
 import { supabase } from '@/lib/supabase';
 import { useAppSelector } from '@/lib/hooks';
 
@@ -259,32 +259,38 @@ export default function FavoritosPage() {
   );
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950 relative overflow-hidden">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950 relative overflow-hidden">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl"></div>
       </div>
 
-      <Sidebar />
+      <HorizontalNavbar />
 
-      <main className="flex-1 lg:ml-64 relative z-10">
-        {/* Top bar */}
-        <div className="sticky top-0 z-30 bg-slate-900/80 backdrop-blur-xl border-b border-slate-800/50 px-4 md:px-8 py-6">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-300">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0a1 1 0 00.95.69h.999c.969 0 1.371 1.24.588 1.81l-.809.588a1 1 0 00-.364 1.118l.309.951c.3.921-.755 1.688-1.538 1.118l-.809-.588a1 1 0 00-1.176 0l-.809.588c-.783.57-1.838-.197-1.538-1.118l.309-.951a1 1 0 00-.364-1.118l-.809-.588c-.783-.57-.38-1.81.588-1.81h.999a1 1 0 00.95-.69z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l.6 1.8H15l-1.95 1.2.75 2.1L12 17.7 10.2 19.1l.75-2.1L9 15.8h2.4L12 14z" />
-              </svg>
-            </div>
-            <div className="flex-1">
-              <h1 className="text-3xl md:text-4xl font-bold text-white">Mis Favoritos</h1>
-              <p className="text-slate-400">{summary.total} capítulos guardados</p>
+      <main className="flex-1 relative z-10 pt-24">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+          {/* Header Card */}
+          <div className="bg-slate-900/35 backdrop-blur-sm border border-slate-800/60 rounded-3xl p-8 mb-8 relative overflow-hidden">
+            <div
+              className="absolute inset-0 opacity-40 pointer-events-none"
+              style={{
+                backgroundImage:
+                  "radial-gradient(circle at 20% 0%, rgba(245,158,11,0.08), transparent 60%), radial-gradient(circle at 70% 20%, rgba(59,130,246,0.10), transparent 60%)",
+              }}
+            />
+            <div className="relative flex items-center gap-5">
+              <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-300">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0a1 1 0 00.95.69h.999c.969 0 1.371 1.24.588 1.81l-.809.588a1 1 0 00-.364 1.118l.309.951c.3.921-.755 1.688-1.538 1.118l-.809-.588a1 1 0 00-1.176 0l-.809.588c-.783.57-1.838-.197-1.538-1.118l.309-.951a1 1 0 00-.364-1.118l-.809-.588c-.783-.57-.38-1.81.588-1.81h.999a1 1 0 00.95-.69z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l.6 1.8H15l-1.95 1.2.75 2.1L12 17.7 10.2 19.1l.75-2.1L9 15.8h2.4L12 14z" />
+                </svg>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-white">Mis Favoritos</h1>
+                <p className="text-slate-400">{summary.total} capítulos guardados</p>
+              </div>
             </div>
           </div>
-        </div>
-
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
           {/* Tabs */}
           <div className="flex items-center justify-between gap-4 mb-6">
             <div className="inline-flex items-center gap-1 bg-slate-900/40 border border-slate-700/50 rounded-2xl p-1">

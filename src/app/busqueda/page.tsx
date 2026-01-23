@@ -2,13 +2,12 @@
 
 import { FastNavigation } from '@/components/FastNavigation';
 import { VerseSearchBar } from '@/components/VerseSearchBar';
-import { Sidebar } from '@/components/Sidebar';
+import { HorizontalNavbar } from '@/components/HorizontalNavbar';
 
 export default function BusquedaPage() {
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950 relative overflow-hidden">
-      {/* Sidebar */}
-      <Sidebar />
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950 relative overflow-hidden">
+      <HorizontalNavbar />
 
       {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -17,7 +16,7 @@ export default function BusquedaPage() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 lg:ml-64 relative z-10 flex flex-col items-center justify-center min-h-screen px-4 py-20">
+      <div className="flex-1 relative z-10 flex flex-col items-center justify-center min-h-screen px-4 py-20 pt-24">
         {/* Verse Search Bar */}
         <div className="w-full mb-12 animate-fade-in">
           <VerseSearchBar />

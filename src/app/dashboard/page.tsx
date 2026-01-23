@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { Sidebar } from "@/components/Sidebar";
+import { HorizontalNavbar } from "@/components/HorizontalNavbar";
 import { AchievementsSection } from "@/components/AchievementsSection";
 import { useAppSelector } from "@/lib/hooks";
 import { supabase } from "@/lib/supabase";
@@ -337,15 +337,15 @@ function DashboardHome() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950 relative overflow-hidden text-white">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/30 to-slate-950 relative overflow-hidden text-white">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl"></div>
       </div>
 
-      <Sidebar />
+      <HorizontalNavbar />
 
-      <main className="flex-1 lg:ml-64 relative z-10 px-4 md:px-8 py-10">
+      <main className="flex-1 relative z-10 px-4 md:px-8 py-10 pt-24">
         <div className="max-w-7xl mx-auto">
           {/* Header profile */}
           <div className="bg-slate-900/35 backdrop-blur-sm border border-slate-800/60 rounded-3xl p-8 mb-8 relative overflow-hidden">

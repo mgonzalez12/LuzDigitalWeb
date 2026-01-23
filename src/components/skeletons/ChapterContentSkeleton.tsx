@@ -29,10 +29,10 @@ export function ChapterContentSkeleton() {
       </div>
 
       {/* Verses Skeleton */}
-      <div className="bg-slate-900/50 backdrop-blur-sm rounded-2xl p-8 md:p-12 border border-slate-700/50">
+      <div className="bg-slate-900/50 backdrop-blur-sm rounded-2xl p-8 md:p-12 border border-slate-700/50 animate-pulse">
         <div className="space-y-6">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-            <div key={i} className="flex gap-4 animate-pulse">
+            <div key={i} className="flex gap-4">
               <div className="flex-shrink-0 w-8 h-8 bg-slate-700/50 rounded-lg"></div>
               <div className="flex-1 space-y-2">
                 <div className="h-6 bg-slate-700/50 rounded-lg"></div>

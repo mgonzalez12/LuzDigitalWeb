@@ -90,3 +90,13 @@ html {
 .animate-shimmer {
   animation: shimmer 2s infinite;
 }
+
+/* Hide scrollbar for carousel */
+.overflow-x-auto::-webkit-scrollbar {
+  display: none;
+}
+
+.overflow-x-auto {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
