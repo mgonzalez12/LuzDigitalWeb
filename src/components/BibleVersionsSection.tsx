@@ -58,7 +58,7 @@ export function BibleVersionsSection() {
 
   if (loading) {
     return (
-      <section id="capitulos" className="py-16 md:py-24 bg-gray-950">
+      <section id="capitulos" className="py-16 md:py-24 bg-gradient-to-b from-gray-950 via-slate-950 to-[#0d1420]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section header */}
           <div className="mb-8 md:mb-12">
@@ -74,7 +74,7 @@ export function BibleVersionsSection() {
 
   if (error) {
     return (
-      <section id="capitulos" className="py-16 md:py-24 bg-gray-950">
+      <section id="capitulos" className="py-16 md:py-24 bg-gradient-to-b from-gray-950 via-slate-950 to-[#0d1420]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center text-red-400">
             <p>Error al cargar las versiones: {error}</p>
@@ -85,7 +85,7 @@ export function BibleVersionsSection() {
   }
 
   return (
-    <section id="capitulos" className="py-16 md:py-24 bg-gray-950">
+    <section id="capitulos" className="py-16 md:py-24 bg-gradient-to-b from-gray-950 via-slate-950 to-[#0d1420]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section header */}
         <div className="flex items-end justify-between mb-8 md:mb-12">

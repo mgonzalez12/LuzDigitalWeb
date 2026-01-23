@@ -26,41 +26,44 @@ export default function Home() {
       <HomeHeroSection />
       {/* Bible Versions Section */}
       <BibleVersionsSection />
-      {/* Tu Viaje Espiritual Section - Solo para usuarios autenticados y verificados */}
-      {showProtectedContent && (
-        <section id="lectura" className="py-16 md:py-24 bg-[#0d1420]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="mb-12 text-center">
-              <h2 className="text-3xl md:text-4xl font-bold mb-2 text-white">Tu Viaje Espiritual</h2>
-              <p className="text-gray-400">Herramientas diseñadas para acompañarte sin presión</p>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-              {/* Versículo del Día - ocupa todo el ancho en móvil, mitad en desktop */}
-              <div className="lg:col-span-2">
-                <DailyVerse />
-              </div>
-
-              {/* Racha de Lectura */}
-              <ReadingStreak />
-
-              {/* Indicador de Progreso Tranquilo */}
-              <ProgressIndicator />
-
-              {/* Recordatorio Suave */}
-              <ReminderCard />
-
-              {/* Sonidos Ambientales */}
-              <AmbientSoundCard />
-            </div>
+      {/* Tu Viaje Espiritual Section */}
+      <section id="lectura" className="py-16 md:py-24 bg-[#0d1420]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-12 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold mb-2 text-white">Tu Viaje Espiritual</h2>
+            <p className="text-gray-400">Herramientas diseñadas para acompañarte sin presión</p>
           </div>
-        </section>
-      )}
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            {/* Versículo del Día - Siempre visible */}
+            <div className="lg:col-span-2">
+              <DailyVerse />
+            </div>
+
+            {/* Contenido restringido - Solo para usuarios autenticados y verificados */}
+            {showProtectedContent && (
+              <>
+                {/* Racha de Lectura */}
+                <ReadingStreak />
+
+                {/* Indicador de Progreso Tranquilo */}
+                <ProgressIndicator />
+
+                {/* Recordatorio Suave */}
+                <ReminderCard />
+
+                {/* Sonidos Ambientales */}
+                <AmbientSoundCard />
+              </>
+            )}
+          </div>
+        </div>
+      </section>
 
      
 
       {/* Experimenta la Claridad Section */}
-      <section id="recursos" className="py-16 md:py-24 bg-[#0a0a0f]">
+      <section id="recursos" className="py-16 md:py-24 bg-gradient-to-b from-[#0d1420] via-[#0a0a0f] to-[#0a0a0f]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section header */}
           <div className="mb-12 text-center">
