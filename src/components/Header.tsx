@@ -31,7 +31,6 @@ export function Header() {
 
           {/* Navigation - Desktop */}
           <nav className="hidden md:flex items-center gap-8">
-            <Link href="#capitulos" className="text-sm hover:text-blue-500 transition-colors">Capítulos</Link>
             <Link href="#recursos" className="text-sm hover:text-blue-500 transition-colors">Recursos</Link>
             <Link href="#comunidad" className="text-sm hover:text-blue-500 transition-colors">Comunidad</Link>
             <Link href="/busqueda" className="text-sm hover:text-blue-500 transition-colors flex items-center gap-1">

@@ -9,7 +9,6 @@ import { useAppSelector } from '@/lib/hooks';
 import { UserDropdown } from './UserDropdown';
 
 const navItems = [
-  { label: 'Capítulos', href: '#capitulos' },
   { label: 'Recursos', href: '#recursos', hasDropdown: true },
   { label: 'Comunidad', href: '#comunidad', hasDropdown: true },
   { label: 'Búsqueda', href: '/busqueda' },
