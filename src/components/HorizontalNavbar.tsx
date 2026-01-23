@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { ChevronDown, Star, Menu, X, Search, Home, BookOpen, Bookmark, Heart, MoreVertical } from 'lucide-react';
+import { NotificationDropdown } from './NotificationDropdown';
 import { VersionSelectorModal } from './VersionSelectorModal';
 import { useAppDispatch, useAppSelector } from '@/lib/hooks';
 import { logout } from '@/lib/features/authSlice';
@@ -298,8 +299,10 @@ export function HorizontalNavbar() {
                 <Search className="h-4 w-4" />
               </Link>
 
-              {/* Profile Dropdown - Solo si está autenticado */}
-              {isAuthenticated ? (
+                <NotificationDropdown />
+                
+                {/* Profile Dropdown - Solo si está autenticado */}
+                {isAuthenticated ? (
                 <div className="relative" ref={profileRef}>
                 <button
                   className={`w-8 h-8 rounded-full overflow-hidden border-2 transition-all ${

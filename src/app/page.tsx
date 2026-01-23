@@ -7,7 +7,7 @@ import HomeNavbar from "@/components/HomeNavbar";
 import HomeHeroSection from "@/components/HomeHeroSection";
 import { ReadingStreak } from "@/components/ReadingStreak";
 import { DailyVerse } from "@/components/DailyVerse";
-import { GentleReminder } from "@/components/GentleReminder";
+import { ReminderCard } from "@/components/ReminderCard";
 import { AmbientSoundCard } from "@/components/AmbientSoundCard";
 import { ProgressIndicator } from "@/components/ProgressIndicator";
 import { BibleVersionsSection } from "@/components/BibleVersionsSection";
@@ -48,7 +48,7 @@ export default function Home() {
               <ProgressIndicator />
 
               {/* Recordatorio Suave */}
-              <GentleReminder />
+              <ReminderCard />
 
               {/* Sonidos Ambientales */}
               <AmbientSoundCard />

@@ -5,6 +5,7 @@ import bibleChapterReducer from './features/bibleChapterSlice';
 import bibleVersesReducer from './features/bibleVersesSlice';
 import authReducer from './features/authSlice';
 import audioReducer from './features/audioSlice';
+import notificationReducer from './features/notificationSlice';
 
 export const makeStore = () => {
   return configureStore({
@@ -15,6 +16,7 @@ export const makeStore = () => {
       bibleVerses: bibleVersesReducer,
       auth: authReducer,
       audio: audioReducer,
+      notifications: notificationReducer,
     },
   });
 };

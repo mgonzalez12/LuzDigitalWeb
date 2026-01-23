@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useAppSelector } from '@/lib/hooks';
+import { NotificationDropdown } from './NotificationDropdown';
 import { UserDropdown } from './UserDropdown';
 
 const navItems = [
@@ -63,9 +64,12 @@ export default function HomeNavbar() {
            
             {!loading && (
               <>
-                {isAuthenticated ? (
-                  <UserDropdown />
-                ) : (
+            {isAuthenticated ? (
+              <div className="flex items-center gap-4">
+                <NotificationDropdown />
+                <UserDropdown />
+              </div>
+            ) : (
                   <>
                     <Link href="/login">
                       <Button variant="ghost" className="text-sm text-gray-300 hover:bg-white/10 hover:text-white">
