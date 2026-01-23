@@ -9,8 +9,8 @@ import { useAppSelector } from '@/lib/hooks';
 import { UserDropdown } from './UserDropdown';
 
 const navItems = [
-  { label: 'Recursos', href: '#recursos', hasDropdown: true },
-  { label: 'Comunidad', href: '#comunidad', hasDropdown: true },
+  { label: 'Recursos', href: '#recursos' },
+  { label: 'Comunidad', href: '#comunidad'},
   { label: 'Búsqueda', href: '/busqueda' },
 ];
 
@@ -54,22 +54,13 @@ export default function HomeNavbar() {
                 className="flex items-center gap-1 rounded-full px-4 py-2 text-sm text-gray-300 transition-colors hover:text-white"
               >
                 {item.label}
-                {item.hasDropdown && <ChevronDown className="h-4 w-4" />}
               </Link>
             ))}
           </div>
 
           {/* Right side */}
           <div className="hidden items-center gap-3 md:flex">
-            <a
-              href="https://github.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 text-sm text-gray-300 transition-colors hover:text-white"
-            >
-              <Star className="h-4 w-4" />
-              Star Us
-            </a>
+           
             {!loading && (
               <>
                 {isAuthenticated ? (
@@ -82,7 +73,7 @@ export default function HomeNavbar() {
                       </Button>
                     </Link>
                     <Link href="/login">
-                      <Button className="rounded-full bg-white px-5 text-sm font-medium text-black hover:bg-gray-100">
+                      <Button className="rounded-md bg-white px-5 text-sm font-medium text-black hover:bg-gray-100">
                         COMENZAR
                       </Button>
                     </Link>

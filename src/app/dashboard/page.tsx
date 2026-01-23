@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { HorizontalNavbar } from "@/components/HorizontalNavbar";
 import { AchievementsSection } from "@/components/AchievementsSection";
+import { ReadingStreak } from "@/components/ReadingStreak";
 import { useAppSelector } from "@/lib/hooks";
 import { supabase } from "@/lib/supabase";
 
@@ -399,14 +400,7 @@ function DashboardHome() {
           <div className="mb-6">
             <h2 className="text-2xl font-semibold mb-4">Tus Estadísticas</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-amber-950/20 border border-amber-500/20 rounded-2xl p-6">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-slate-300">Racha Actual</div>
-                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">🔥</div>
-                </div>
-                <div className="text-4xl font-bold mt-3">{streak}</div>
-                <div className="text-xs text-slate-400">días consecutivos</div>
-              </div>
+              <ReadingStreak />
               <div className="bg-slate-900/35 border border-slate-800/60 rounded-2xl p-6">
                 <div className="flex items-center justify-between">
                   <div className="text-sm text-slate-300">Capítulos Leídos</div>

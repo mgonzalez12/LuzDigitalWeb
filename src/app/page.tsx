@@ -24,7 +24,8 @@ export default function Home() {
     <div className="min-h-screen bg-[#0a0a0f] text-white">
       <HomeNavbar />
       <HomeHeroSection />
-
+      {/* Bible Versions Section */}
+      <BibleVersionsSection />
       {/* Tu Viaje Espiritual Section - Solo para usuarios autenticados y verificados */}
       {showProtectedContent && (
         <section id="lectura" className="py-16 md:py-24 bg-[#0d1420]">
@@ -58,8 +59,7 @@ export default function Home() {
         </section>
       )}
 
-      {/* Bible Versions Section */}
-      <BibleVersionsSection />
+     
 
       {/* Experimenta la Claridad Section */}
       <section id="recursos" className="py-16 md:py-24 bg-[#0a0a0f]">
