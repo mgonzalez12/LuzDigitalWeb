@@ -8,7 +8,7 @@ import HomeHeroSection from "@/components/HomeHeroSection";
 import { ReadingStreak } from "@/components/ReadingStreak";
 import { DailyVerse } from "@/components/DailyVerse";
 import { GentleReminder } from "@/components/GentleReminder";
-import { FocusMode } from "@/components/FocusMode";
+import { AmbientSoundCard } from "@/components/AmbientSoundCard";
 import { ProgressIndicator } from "@/components/ProgressIndicator";
 import { BibleVersionsSection } from "@/components/BibleVersionsSection";
 import { useAppSelector } from "@/lib/hooks";
@@ -24,7 +24,8 @@ export default function Home() {
     <div className="min-h-screen bg-[#0a0a0f] text-white">
       <HomeNavbar />
       <HomeHeroSection />
-
+      {/* Bible Versions Section */}
+      <BibleVersionsSection />
       {/* Tu Viaje Espiritual Section - Solo para usuarios autenticados y verificados */}
       {showProtectedContent && (
         <section id="lectura" className="py-16 md:py-24 bg-[#0d1420]">
@@ -49,17 +50,14 @@ export default function Home() {
               {/* Recordatorio Suave */}
               <GentleReminder />
 
-              {/* Modo de Concentración - ocupa todo el ancho */}
-              <div className="lg:col-span-2">
-                <FocusMode />
-              </div>
+              {/* Sonidos Ambientales */}
+              <AmbientSoundCard />
             </div>
           </div>
         </section>
       )}
 
-      {/* Bible Versions Section */}
-      <BibleVersionsSection />
+     
 
       {/* Experimenta la Claridad Section */}
       <section id="recursos" className="py-16 md:py-24 bg-[#0a0a0f]">

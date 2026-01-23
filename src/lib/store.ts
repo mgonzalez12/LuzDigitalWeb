@@ -4,6 +4,7 @@ import bibleBooksReducer from './features/bibleBooksSlice';
 import bibleChapterReducer from './features/bibleChapterSlice';
 import bibleVersesReducer from './features/bibleVersesSlice';
 import authReducer from './features/authSlice';
+import audioReducer from './features/audioSlice';
 
 export const makeStore = () => {
   return configureStore({
@@ -13,6 +14,7 @@ export const makeStore = () => {
       bibleChapter: bibleChapterReducer,
       bibleVerses: bibleVersesReducer,
       auth: authReducer,
+      audio: audioReducer,
     },
   });
 };

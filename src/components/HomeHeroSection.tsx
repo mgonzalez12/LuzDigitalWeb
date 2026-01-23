@@ -8,6 +8,7 @@ import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/lib/hooks';
 import { fetchBibleBooks } from '@/lib/features/bibleBooksSlice';
+import ParticleTextEffect from './ParticleTextEffect';
 
 const LightBeamScene = dynamic(() => import('./LightBeamScene'), {
   ssr: false,
@@ -53,24 +54,15 @@ export default function HomeHeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1 }}
-            className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-2 backdrop-blur-sm"
+            className="mb-2 inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-2 backdrop-blur-sm"
           >
             <div className="h-2 w-2 rounded-full bg-blue-400 animate-pulse" />
             <span className="text-xs font-medium text-blue-300">VERSIÓN 2.0 DISPONIBLE</span>
           </motion.div>
 
-          <motion.h1
-            className="mb-6 text-balance font-sans text-5xl font-bold tracking-tight text-white md:text-7xl lg:text-8xl"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            <span className="bg-gradient-to-r from-white via-blue-100 to-blue-200 bg-clip-text text-transparent">
-              La Palabra en
-            </span>
-            <br />
-            <span className="text-white">Nueva Luz</span>
-          </motion.h1>
+          <div className="mb-0 w-full max-w-6xl mx-auto">
+            <ParticleTextEffect text="La Palabra en Nueva Luz" />
+          </div>
 
           <motion.p
             className="mx-auto mb-10 max-w-xl text-pretty text-lg text-gray-400 md:text-xl"
