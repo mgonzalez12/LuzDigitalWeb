@@ -6,8 +6,10 @@ import { useEffect, useMemo, useState } from "react";
 import { HorizontalNavbar } from "@/components/HorizontalNavbar";
 import { AchievementsSection } from "@/components/AchievementsSection";
 import { ReadingStreak } from "@/components/ReadingStreak";
-import { useAppSelector } from "@/lib/hooks";
+import { AmbientSoundCard } from "@/components/AmbientSoundCard";
+import { useAppSelector, useAppDispatch } from "@/lib/hooks";
 import { supabase } from "@/lib/supabase";
+import { setSound, togglePlay, AmbientSoundType } from "@/lib/features/audioSlice";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -90,6 +92,11 @@ function computeStreakUtc(days: string[]) {
 
 function DashboardHome() {
   const { user } = useAppSelector((s) => s.auth);
+  // Safely select audio state with a fallback
+  const audioState = useAppSelector((s) => s.audio);
+  const currentSound = audioState?.currentSound || 'none';
+  
+  const dispatch = useAppDispatch();
   const userId = user?.id;
 
   const [loading, setLoading] = useState(true);
@@ -476,30 +483,11 @@ function DashboardHome() {
                 </Link>
               </div>
 
+              <AmbientSoundCard />
+
               <div className="bg-slate-900/35 border border-slate-800/60 rounded-3xl p-6">
                 <div className="font-semibold text-xl mb-4">Configuración Rápida</div>
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between py-2">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-2xl bg-slate-950/40 border border-slate-700/50 flex items-center justify-center">🔊</div>
-                      <div>
-                        <div className="text-sm font-semibold">Sonidos</div>
-                        <div className="text-xs text-slate-400">{soundsEnabled ? "Activado" : "Desactivado"}</div>
-                      </div>
-                    </div>
-                    <button
-                      onClick={async () => {
-                        const v = !soundsEnabled;
-                        setSoundsEnabled(v);
-                        await saveSettings({ sounds_enabled: v });
-                      }}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${soundsEnabled ? "bg-amber-400" : "bg-slate-700"}`}
-                      aria-label="Toggle sonidos"
-                    >
-                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${soundsEnabled ? "translate-x-6" : "translate-x-1"}`} />
-                    </button>
-                  </div>
-
                   <div className="flex items-center justify-between py-2">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-2xl bg-slate-950/40 border border-slate-700/50 flex items-center justify-center">⏰</div>

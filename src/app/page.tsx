@@ -8,7 +8,7 @@ import HomeHeroSection from "@/components/HomeHeroSection";
 import { ReadingStreak } from "@/components/ReadingStreak";
 import { DailyVerse } from "@/components/DailyVerse";
 import { GentleReminder } from "@/components/GentleReminder";
-import { FocusMode } from "@/components/FocusMode";
+import { AmbientSoundCard } from "@/components/AmbientSoundCard";
 import { ProgressIndicator } from "@/components/ProgressIndicator";
 import { BibleVersionsSection } from "@/components/BibleVersionsSection";
 import { useAppSelector } from "@/lib/hooks";
@@ -50,10 +50,8 @@ export default function Home() {
               {/* Recordatorio Suave */}
               <GentleReminder />
 
-              {/* Modo de Concentración - ocupa todo el ancho */}
-              <div className="lg:col-span-2">
-                <FocusMode />
-              </div>
+              {/* Sonidos Ambientales */}
+              <AmbientSoundCard />
             </div>
           </div>
         </section>
