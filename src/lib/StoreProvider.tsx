@@ -5,6 +5,7 @@ import { Provider } from 'react-redux';
 import { makeStore, AppStore } from './store';
 import { AuthProvider } from '@/components/AuthProvider';
 import AmbientAudioPlayer from '@/components/AmbientAudioPlayer';
+import { NotificationManager } from '@/components/NotificationManager';
 
 export default function StoreProvider({
   children,
@@ -21,6 +22,7 @@ export default function StoreProvider({
     <Provider store={storeRef.current}>
       <AuthProvider>
         <AmbientAudioPlayer />
+        <NotificationManager />
         {children}
       </AuthProvider>
     </Provider>

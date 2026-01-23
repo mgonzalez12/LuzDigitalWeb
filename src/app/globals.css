@@ -100,3 +100,10 @@ html {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Sidebar open - desplazar contenido en móvil/tablet */
+@media (max-width: 1023px) {
+  html.sidebar-open {
+    overflow-x: hidden;
+  }
+}

@@ -119,8 +119,8 @@ export default function HomeHeroSection() {
         </motion.div>
       </div>
 
-      {/* Bottom fade */}
-      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#0a0a0f] to-transparent" />
+      {/* Bottom fade - Transición suave hacia Versiones de la Biblia */}
+      <div className="absolute inset-x-0 bottom-0 h-60 bg-gradient-to-t from-gray-950 via-[#0a0a0f] to-transparent" />
     </section>
   );
 }
