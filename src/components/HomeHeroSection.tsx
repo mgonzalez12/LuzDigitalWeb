@@ -57,7 +57,7 @@ export default function HomeHeroSection() {
             className="mb-2 inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-2 backdrop-blur-sm"
           >
             <div className="h-2 w-2 rounded-full bg-blue-400 animate-pulse" />
-            <span className="text-xs font-medium text-blue-300">VERSIÓN 2.0 DISPONIBLE</span>
+            <span className="text-xs font-medium text-blue-300">VERSIÓN 1.0 DISPONIBLE</span>
           </motion.div>
 
           <div className="mb-0 w-full max-w-6xl mx-auto">
@@ -70,8 +70,7 @@ export default function HomeHeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
           >
-            Una experiencia digital moderna y open-source para el cristiano contemporáneo.
-            Sumérgete en la espiritualidad con diseño de alta tecnología.
+            Una experiencia digital moderna para el creyente de hoy. Sumérgete en la Palabra y el amor de Dios con un diseño inspirador.
           </motion.p>
 
           <motion.div

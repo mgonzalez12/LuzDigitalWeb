@@ -312,20 +312,6 @@ export function DailyVerse() {
             </svg>
             <span className="text-sm font-medium text-amber-700 dark:text-amber-400">Versículo del Día</span>
           </div>
-          <button
-            onClick={handleSave}
-            className="p-2 hover:bg-amber-100 dark:hover:bg-amber-900/30 rounded-lg transition-colors"
-            aria-label={isSaved ? "Remover de favoritos" : "Guardar en favoritos"}
-          >
-            <svg 
-              className={`w-5 h-5 transition-colors ${isSaved ? 'text-amber-500 fill-current' : 'text-slate-400 dark:text-gray-500'}`} 
-              fill={isSaved ? "currentColor" : "none"} 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-            </svg>
-          </button>
         </div>
 
         {isLoading ? (
