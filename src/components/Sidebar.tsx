@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { VersionSelectorModal } from './VersionSelectorModal';
 import { useAppDispatch, useAppSelector } from '@/lib/hooks';
@@ -100,19 +101,22 @@ export function Sidebar() {
         {/* Logo */}
         <div className="p-6 border-b border-slate-700/50">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-8 h-8 flex items-center justify-center">
-              <svg viewBox="0 0 24 24" fill="none" className="w-full h-full text-blue-500">
-                <circle cx="12" cy="12" r="4" fill="currentColor"/>
-                <path d="M12 2 L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M12 18 L12 22" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M4.93 4.93 L7.76 7.76" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M16.24 16.24 L19.07 19.07" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M2 12 L6 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M18 12 L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M4.93 19.07 L7.76 16.24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M16.24 7.76 L19.07 4.93" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-            </div>
+            <img
+              src="/prueba_logo_luzDigital_sin_fondo.png"
+              alt="Luz Digital"
+              className="flex-shrink-0"
+              style={{
+                width: '60px !important',
+                height: '60px !important',
+                minWidth: '60px',
+                minHeight: '60px',
+                maxWidth: '60px',
+                maxHeight: '60px',
+                objectFit: 'contain',
+                display: 'block',
+                flexShrink: 0
+              }}
+            />
             <div>
               <div className="text-sm font-bold text-white">Luz Digital</div>
               <div className="text-xs text-slate-400">LECTOR WEB</div>

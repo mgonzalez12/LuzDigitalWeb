@@ -10,8 +10,7 @@ import { NotificationDropdown } from './NotificationDropdown';
 import { UserDropdown } from './UserDropdown';
 
 const navItems = [
-  { label: 'Recursos', href: '#recursos' },
-  { label: 'Comunidad', href: '#comunidad'},
+  { label: 'Comunidad', href: '/comunidad'},
   { label: 'Búsqueda', href: '/busqueda' },
 ];
 
@@ -66,20 +65,23 @@ export default function HomeNavbar() {
           >
           {/* Header del Sidebar */}
           <div className="flex items-center justify-between p-5 border-b border-white/10 bg-[#0a0a0f]/50 backdrop-blur-sm sticky top-0 z-10">
-            <Link href="/" className="flex items-center gap-2.5" onClick={() => setMobileMenuOpen(false)}>
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-cyan-400 shadow-lg">
-                <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-white">
-                  <circle cx="12" cy="12" r="4" fill="currentColor" />
-                  <path d="M12 2 L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  <path d="M12 18 L12 22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  <path d="M4.93 4.93 L7.76 7.76" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  <path d="M16.24 16.24 L19.07 19.07" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  <path d="M2 12 L6 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  <path d="M18 12 L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  <path d="M4.93 19.07 L7.76 16.24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  <path d="M16.24 7.76 L19.07 4.93" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-              </div>
+            <Link href="/" className="flex items-center gap-3" onClick={() => setMobileMenuOpen(false)}>
+              <img
+                src="/prueba_logo_luzDigital_sin_fondo.png"
+                alt="Luz Digital"
+                className="flex-shrink-0"
+                style={{
+                  width: '80px !important',
+                    height: '60px !important',
+                    minWidth: '60px',
+                    minHeight: '60px',
+                    maxWidth: '80px',
+                    maxHeight: '60px',
+                    objectFit: 'contain',
+                    display: 'block',
+                    flexShrink: 0
+                }}
+              />
               <span className="text-lg font-semibold text-white">Luz Digital</span>
             </Link>
             <button
@@ -145,20 +147,23 @@ export default function HomeNavbar() {
       <div className="mx-auto max-w-7xl px-6 py-4">
         <nav className="flex items-center justify-between rounded-full border border-white/10 bg-black/20 px-6 py-3 backdrop-blur-xl">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-cyan-400">
-              <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-white">
-                <circle cx="12" cy="12" r="4" fill="currentColor" />
-                <path d="M12 2 L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                <path d="M12 18 L12 22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                <path d="M4.93 4.93 L7.76 7.76" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                <path d="M16.24 16.24 L19.07 19.07" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                <path d="M2 12 L6 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                <path d="M18 12 L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                <path d="M4.93 19.07 L7.76 16.24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                <path d="M16.24 7.76 L19.07 4.93" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            </div>
+          <Link href="/" className="flex items-center gap-3">
+            <img
+              src="/prueba_logo_luzDigital_sin_fondo.png"
+              alt="Luz Digital"
+              className="flex-shrink-0"
+              style={{
+                width: '80px !important',
+                    height: '60px !important',
+                    minWidth: '60px',
+                    minHeight: '60px',
+                    maxWidth: '80px',
+                    maxHeight: '60px',
+                    objectFit: 'contain',
+                    display: 'block',
+                    flexShrink: 0
+              }}
+            />
             <span className="text-lg font-semibold text-white">Luz Digital</span>
           </Link>
 
