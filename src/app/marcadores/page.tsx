@@ -250,9 +250,7 @@ export default function MarcadoresPage() {
         : '';
 
     try {
-      // @ts-expect-error web share
       if (navigator.share) {
-        // @ts-expect-error web share
         await navigator.share({ title: ref, text, url });
       } else if (navigator.clipboard) {
         await navigator.clipboard.writeText(`${text}\n${url}`);

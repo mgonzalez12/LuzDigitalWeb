@@ -65,7 +65,7 @@ export function NotificationManager() {
 
     if (notification) {
         // 1. Dispatch to Redux (Immediate UI update for Dropdown)
-        dispatch(addNotification(notification as Notification));
+        dispatch(addNotification({ ...notification, type: notification.type || 'daily_reminder' } as Notification));
 
         // 2. Show Modal (Visual feedback)
         setCurrentNotification({ title, message });

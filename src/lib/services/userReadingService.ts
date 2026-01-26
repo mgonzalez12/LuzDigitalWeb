@@ -15,7 +15,7 @@ export class UserReadingService {
   static async getReadingDays(userId: string): Promise<ReadingDay[]> {
     const { data, error } = await supabase
       .from('user_reading_days')
-      .select('day')
+      .select('day, user_id')
       .eq('user_id', userId)
       .order('day', { ascending: false });
 
@@ -24,7 +24,7 @@ export class UserReadingService {
       return [];
     }
 
-    return data ?? [];
+    return (data ?? []) as ReadingDay[];
   }
 
   /**
