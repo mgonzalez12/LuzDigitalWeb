@@ -24,7 +24,7 @@ export function NotificationDropdown() {
       });
 
       if (notifications) {
-        dispatch(setNotifications(notifications as Notification[]));
+        dispatch(setNotifications(notifications.map(n => ({ ...n, type: n.type || 'default' })) as Notification[]));
       }
     };
 
