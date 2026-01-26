@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAppSelector } from '@/lib/hooks';
-import { supabase } from '@/lib/supabase';
+import { UserReadingService } from '@/lib/services/userReadingService';
 
 export function ReadingStreak() {
   const [streak, setStreak] = useState(0);
@@ -50,15 +50,10 @@ export function ReadingStreak() {
         return;
       }
 
-      const { data } = await supabase
-        .from('user_reading_days')
-        .select('day')
-        .eq('user_id', user.id)
-        .order('day', { ascending: false })
-        .limit(60);
+      const readingDays = await UserReadingService.getReadingDays(user.id);
 
       if (cancelled) return;
-      const days = (data ?? []) as Array<{ day: string }>;
+      const days = readingDays.slice(0, 60).map(d => ({ day: d.day }));
 
       // Si pasaron más de 4 días sin registrar lectura, resetear la racha (borrar registros)
       if (days.length > 0) {
@@ -67,7 +62,7 @@ export function ReadingStreak() {
         todayUtc.setUTCHours(0, 0, 0, 0);
         const diff = daysDiffUtc(todayUtc, lastDay);
         if (diff > 4) {
-          await supabase.from('user_reading_days').delete().eq('user_id', user.id);
+          await UserReadingService.clearReadingDays(user.id);
           if (cancelled) return;
           setStreak(0);
           setHasReadToday(false);
@@ -100,10 +95,7 @@ export function ReadingStreak() {
     const day = new Date().toISOString().slice(0, 10);
 
     // Inserta solo 1 vez por día (PK evita duplicados)
-    await supabase.from('user_reading_days').insert({
-      user_id: user.id,
-      day,
-    });
+    await UserReadingService.addReadingDay(user.id, day);
 
     setHasReadToday(true);
     // Refrescar racha (y otros widgets)

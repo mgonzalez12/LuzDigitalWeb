@@ -4,32 +4,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { HorizontalNavbar } from '@/components/HorizontalNavbar';
-import { supabase } from '@/lib/supabase';
+import { UserFavoritesService, FavoriteRow, BookMeta, ChapterData } from '@/lib/services/userFavoritesService';
 import { useAppSelector } from '@/lib/hooks';
 
-type FavoriteRow = {
-  user_id: string;
-  version_code: string;
-  book_slug: string;
-  chapter_number: number;
-  created_at: string;
-};
-
-type BookMeta = {
-  version_code: string;
-  slug: string;
-  name: string;
-  testament: 'old' | 'new';
-  chapter_count: number;
-};
-
-type ChapterData = {
-  testament: string;
-  name: string;
-  num_chapters: number;
-  chapter: number;
-  vers: Array<{ number: number; verse: string }>;
-};
+// Types are now imported from the service
 
 type ViewMode = 'grid' | 'list';
 type TestamentFilter = 'all' | 'old' | 'new';
@@ -93,46 +71,9 @@ export default function FavoritosPage() {
 
       setIsLoading(true);
 
-      const { data: fav, error: favError } = await supabase
-        .from('user_chapter_favorites')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (favError) console.error(favError);
-      const rows = (fav ?? []) as FavoriteRow[];
-
-      // Books meta (solo versiones presentes)
-      const versions = Array.from(new Set(rows.map((r) => r.version_code)));
-      let metaMap = new Map<string, BookMeta>();
-      if (versions.length > 0) {
-        const { data: books } = await supabase
-          .from('bible_books')
-          .select('version_code,slug,name,testament,chapter_count')
-          .in('version_code', versions);
-        metaMap = new Map((books ?? []).map((b: any) => [`${b.version_code}:${b.slug}`, b as BookMeta]));
-      }
-
-      // Fetch de capítulos (1 por favorito) para mostrar snippet
-      const keys = rows.map((r) => `${r.version_code}:${r.book_slug}:${r.chapter_number}`);
-      const uniqueKeys = Array.from(new Set(keys));
-
-      const newCache = new Map<string, ChapterData>();
-      for (const key of uniqueKeys) {
-        // eslint-disable-next-line no-await-in-loop
-        const [v, b, ch] = key.split(':');
-        try {
-          const res = await fetch(`https://bible-api.deno.dev/api/read/${v}/${b}/${ch}`, {
-            signal: controller.signal,
-          });
-          if (!res.ok) continue;
-          // eslint-disable-next-line no-await-in-loop
-          const data = (await res.json()) as ChapterData;
-          newCache.set(key, data);
-        } catch {
-          // ignore
-        }
-      }
+      // Usar el servicio optimizado que hace todo en paralelo
+      const { favorites: rows, booksMeta: metaMap, chapterCache: newCache } =
+        await UserFavoritesService.getFavoritesWithData(user.id, controller.signal);
 
       if (cancelled) return;
       setFavorites(rows);
@@ -204,13 +145,12 @@ export default function FavoritosPage() {
   };
 
   const handleDelete = async (r: FavoriteRow) => {
-    await supabase
-      .from('user_chapter_favorites')
-      .delete()
-      .eq('user_id', r.user_id)
-      .eq('version_code', r.version_code)
-      .eq('book_slug', r.book_slug)
-      .eq('chapter_number', r.chapter_number);
+    await UserFavoritesService.deleteFavorite(
+      r.user_id,
+      r.version_code,
+      r.book_slug,
+      r.chapter_number
+    );
 
     setOpenMenuKey(null);
     setFavorites((prev) =>

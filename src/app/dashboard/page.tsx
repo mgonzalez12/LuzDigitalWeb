@@ -9,7 +9,9 @@ import { ReadingStreak } from "@/components/ReadingStreak";
 import { AmbientSoundCard } from "@/components/AmbientSoundCard";
 import { ReminderCard } from "@/components/ReminderCard";
 import { useAppSelector, useAppDispatch } from "@/lib/hooks";
-import { supabase } from "@/lib/supabase";
+import { UserStatsService } from "@/lib/services/userStatsService";
+import { UserReadingService } from "@/lib/services/userReadingService";
+import { UserSettingsService } from "@/lib/services/userSettingsService";
 import { setSound, togglePlay, AmbientSoundType } from "@/lib/features/audioSlice";
 
 export default function DashboardPage() {
@@ -158,35 +160,24 @@ function DashboardHome() {
 
     const ensureSettings = async () => {
       if (!userId) return;
-      const { data } = await supabase
-        .from("user_settings")
-        .select("preferred_version_code,sounds_enabled,reminders_enabled,reminder_time")
-        .eq("user_id", userId)
-        .maybeSingle();
+      const settings = await UserSettingsService.getUserSettings(userId);
 
-      const row = data as any;
-      if (row) {
+      if (settings) {
         if (cancelled) return;
-        setPreferredVersion(row.preferred_version_code);
-        setSoundsEnabled(!!row.sounds_enabled);
-        setRemindersEnabled(!!row.reminders_enabled);
-        setReminderTime(String(row.reminder_time).slice(0, 5));
+        setPreferredVersion(settings.preferred_version_code || "rv1960");
+        setSoundsEnabled(!!settings.sounds_enabled);
+        setRemindersEnabled(!!settings.reminders_enabled);
+        setReminderTime(settings.reminder_time ? String(settings.reminder_time).slice(0, 5) : "09:00");
         return;
       }
 
       // Usar upsert para evitar 409 (React dev puede ejecutar efectos 2 veces)
-      await supabase
-        .from("user_settings")
-        .upsert(
-          {
-            user_id: userId,
-            preferred_version_code: "rv1960",
-            sounds_enabled: true,
-            reminders_enabled: true,
-            reminder_time: "09:00",
-          },
-          { onConflict: "user_id" }
-        );
+      await UserSettingsService.saveUserSettings(userId, {
+        preferred_version_code: "rv1960",
+        sounds_enabled: true,
+        reminders_enabled: true,
+        reminder_time: "09:00",
+      });
     };
 
     ensureSettings();
@@ -203,57 +194,19 @@ function DashboardHome() {
       setLoading(true);
 
       // Racha / días activos
-      const { data: daysRows } = await supabase
-        .from("user_reading_days")
-        .select("day", { count: "exact" })
-        .eq("user_id", userId)
-        .order("day", { ascending: false })
-        .limit(120);
-
-      const days = (daysRows ?? []) as Array<{ day: string }>;
+      const days = await UserStatsService.getReadingDays(userId, 120);
       const streakValue = computeStreakUtc(days.map((d) => d.day));
       const activeDaysCount = days.length;
 
-      // Capítulos leídos (version preferida)
-      const { count: readCount } = await supabase
-        .from("user_chapter_progress")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", userId)
-        .eq("version_code", preferredVersion);
-
-      // Total capítulos (version preferida)
-      const { count: totalCount } = await supabase
-        .from("bible_chapters")
-        .select("*", { count: "exact", head: true })
-        .eq("version_code", preferredVersion);
-
-      // Versículos guardados
-      const { count: bmCount } = await supabase
-        .from("user_verse_bookmarks")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", userId);
-
-      // Actividad reciente (merge)
-      const [{ data: reads }, { data: bms }, { data: favs }] = await Promise.all([
-        supabase
-          .from("user_chapter_progress")
-          .select("version_code,book_slug,chapter_number,last_read_at")
-          .eq("user_id", userId)
-          .order("last_read_at", { ascending: false })
-          .limit(10),
-        supabase
-          .from("user_verse_bookmarks")
-          .select("version_code,book_slug,chapter_number,verse_number,created_at")
-          .eq("user_id", userId)
-          .order("created_at", { ascending: false })
-          .limit(10),
-        supabase
-          .from("user_chapter_favorites")
-          .select("version_code,book_slug,chapter_number,created_at")
-          .eq("user_id", userId)
-          .order("created_at", { ascending: false })
-          .limit(10),
+      // Capítulos leídos, total capítulos, versículos guardados y actividad reciente
+      const [readCount, totalCount, bmCount, activity] = await Promise.all([
+        UserStatsService.getChaptersReadCount(userId, preferredVersion),
+        UserStatsService.getTotalChaptersCount(preferredVersion),
+        UserStatsService.getBookmarksCount(userId),
+        UserStatsService.getRecentActivity(userId),
       ]);
+
+      const { reads, bookmarks, favorites } = activity;
 
       const items: ActivityItem[] = [
         ...((reads ?? []) as any[]).map((r) => ({
@@ -266,7 +219,7 @@ function DashboardHome() {
           badge: "LEÍDO" as const,
           color: "blue" as const,
         })),
-        ...((bms ?? []) as any[]).map((r) => ({
+        ...((bookmarks ?? []) as any[]).map((r) => ({
           type: "bookmark" as const,
           at: r.created_at,
           version_code: r.version_code,
@@ -277,7 +230,7 @@ function DashboardHome() {
           badge: "GUARDADO" as const,
           color: "amber" as const,
         })),
-        ...((favs ?? []) as any[]).map((r) => ({
+        ...((favorites ?? []) as any[]).map((r) => ({
           type: "favorite" as const,
           at: r.created_at,
           version_code: r.version_code,
@@ -296,12 +249,13 @@ function DashboardHome() {
       let names = new Map<string, { name: string; testament: Testament }>();
       if (items.length > 0) {
         const versionCodes = Array.from(new Set(items.map((i) => i.version_code)));
-        const { data: books } = await supabase
-          .from("bible_books")
-          .select("version_code,slug,name,testament")
-          .in("version_code", versionCodes);
+        const booksInfo = await UserStatsService.getBooksInfo(versionCodes);
+        // Convertir el Map de BookInfo a el formato esperado con Testament
         names = new Map(
-          (books ?? []).map((b: any) => [`${b.version_code}:${b.slug}`, { name: b.name, testament: b.testament }])
+          Array.from(booksInfo.entries()).map(([key, value]) => [
+            key,
+            { name: value.name, testament: value.testament as Testament },
+          ])
         );
       }
 
@@ -336,8 +290,8 @@ function DashboardHome() {
 
   const saveSettings = async (patch: Partial<{ preferred_version_code: string; sounds_enabled: boolean; reminders_enabled: boolean; reminder_time: string }>) => {
     if (!userId) return;
-    await supabase.from("user_settings").upsert({
-      user_id: userId,
+    const { UserSettingsService } = await import('@/lib/services/userSettingsService');
+    await UserSettingsService.saveUserSettings(userId, {
       preferred_version_code: patch.preferred_version_code ?? preferredVersion,
       sounds_enabled: patch.sounds_enabled ?? soundsEnabled,
       reminders_enabled: patch.reminders_enabled ?? remindersEnabled,

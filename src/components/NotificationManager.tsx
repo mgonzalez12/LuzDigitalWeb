@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useAppSelector, useAppDispatch } from '@/lib/hooks';
-import { supabase } from '@/lib/supabase';
+import { UserSettingsService } from '@/lib/services/userSettingsService';
+import { UserNotificationsService } from '@/lib/services/userNotificationsService';
 import { addNotification, Notification } from '@/lib/features/notificationSlice';
 import Link from 'next/link';
 import { BookOpen, X } from 'lucide-react';
@@ -28,11 +29,7 @@ export function NotificationManager() {
 
       lastCheckedMinute.current = currentTimeString;
 
-      const { data: settings } = await supabase
-        .from('user_settings')
-        .select('reminders_enabled, reminder_time')
-        .eq('user_id', user.id)
-        .single();
+      const settings = await UserSettingsService.getUserSettings(user.id);
 
       if (!settings || !settings.reminders_enabled || !settings.reminder_time) return;
 
@@ -60,22 +57,15 @@ export function NotificationManager() {
     const message = 'Tómate un momento para conectar con la palabra de Dios. Tu racha te espera.';
 
     // Insert/Update in database and return the data
-    const { data, error } = await supabase.from('user_notifications').upsert({
-      user_id: userId,
+    const notification = await UserNotificationsService.upsertNotification(userId, {
       title,
       message,
       is_read: false,
-      type: 'daily_reminder',
-      created_at: new Date().toISOString()
-    }, { onConflict: 'user_id, type' })
-    .select()
-    .single();
+    });
 
-    if (error) {
-      console.error('Error triggering notification:', error);
-    } else if (data) {
+    if (notification) {
         // 1. Dispatch to Redux (Immediate UI update for Dropdown)
-        dispatch(addNotification(data as Notification));
+        dispatch(addNotification(notification as Notification));
 
         // 2. Show Modal (Visual feedback)
         setCurrentNotification({ title, message });

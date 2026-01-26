@@ -8,7 +8,9 @@ import { useAppDispatch, useAppSelector } from '@/lib/hooks';
 import { fetchBibleChapter } from '@/lib/features/bibleChapterSlice';
 import { ChapterContentSkeleton } from '@/components/skeletons/ChapterContentSkeleton';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
+import { BibleChapterService } from '@/lib/services/bibleChapterService';
+import { UserChapterService } from '@/lib/services/userChapterService';
+import { UserReadingService } from '@/lib/services/userReadingService';
 
 export default function LeerCapituloPage() {
   const params = useParams();
@@ -76,16 +78,14 @@ export default function LeerCapituloPage() {
       if (!version || !libro || !Number.isFinite(chapterNumber)) return;
 
       // Imagen es pública (aunque no haya sesión)
-      const { data: chapterRow } = await supabase
-        .from('bible_chapters')
-        .select('image_url')
-        .eq('version_code', version)
-        .eq('book_slug', libro)
-        .eq('chapter_number', chapterNumber)
-        .maybeSingle();
+      const imageUrl = await BibleChapterService.getChapterImageUrl(
+        version,
+        libro,
+        chapterNumber
+      );
 
       if (!cancelled) {
-        setChapterImageUrl(chapterRow?.image_url ?? null);
+        setChapterImageUrl(imageUrl);
       }
 
       if (!isAuthenticated || !user?.id) {
@@ -97,36 +97,18 @@ export default function LeerCapituloPage() {
         return;
       }
 
-      const [{ data: favRow }, { data: bmRows }, { data: progressRow }] = await Promise.all([
-        supabase
-          .from('user_chapter_favorites')
-          .select('chapter_number')
-          .eq('user_id', user.id)
-          .eq('version_code', version)
-          .eq('book_slug', libro)
-          .eq('chapter_number', chapterNumber)
-          .maybeSingle(),
-        supabase
-          .from('user_verse_bookmarks')
-          .select('verse_number')
-          .eq('user_id', user.id)
-          .eq('version_code', version)
-          .eq('book_slug', libro)
-          .eq('chapter_number', chapterNumber),
-        supabase
-          .from('user_chapter_progress')
-          .select('reads_count')
-          .eq('user_id', user.id)
-          .eq('version_code', version)
-          .eq('book_slug', libro)
-          .eq('chapter_number', chapterNumber)
-          .maybeSingle(),
-      ]);
+      // Obtener todo el estado del usuario para el capítulo en una sola llamada
+      const userState = await UserChapterService.getChapterUserState(
+        user.id,
+        version,
+        libro,
+        chapterNumber
+      );
 
       if (cancelled) return;
-      setIsFavorite(!!favRow);
-      setIsRead(!!progressRow);
-      setBookmarkedVerses(new Set((bmRows ?? []).map((r) => r.verse_number)));
+      setIsFavorite(userState.isFavorite);
+      setIsRead(userState.isRead);
+      setBookmarkedVerses(userState.bookmarkedVerses);
     };
 
     run();
@@ -158,15 +140,11 @@ export default function LeerCapituloPage() {
         if (!cancelled) setStreakDays(0);
         return;
       }
-      const { data } = await supabase
-        .from('user_reading_days')
-        .select('day')
-        .eq('user_id', user.id)
-        .order('day', { ascending: false })
-        .limit(60);
+      const readingDays = await UserReadingService.getReadingDays(user.id);
 
       if (cancelled) return;
-      setStreakDays(computeStreakFromDays((data ?? []) as Array<{ day: string }>));
+      const days = readingDays.slice(0, 60).map(d => ({ day: d.day }));
+      setStreakDays(computeStreakFromDays(days));
     };
 
     load();
@@ -386,24 +364,26 @@ export default function LeerCapituloPage() {
   };
 
   const handleToggleFavorite = async () => {
-    if (!isAuthenticated) return;
-    const { data } = await supabase.rpc('toggle_chapter_favorite', {
-      p_version_code: version,
-      p_book_slug: libro,
-      p_chapter_number: chapterNumber,
-    });
-    setIsFavorite(!!data);
+    if (!isAuthenticated || !user?.id) return;
+    const isFavoriteAfterToggle = await UserChapterService.toggleChapterFavorite(
+      user.id,
+      version,
+      libro,
+      chapterNumber
+    );
+    setIsFavorite(isFavoriteAfterToggle);
   };
 
   const handleMarkAsRead = async () => {
-    if (!isAuthenticated || isRead || isMarkingRead) return;
+    if (!isAuthenticated || !user?.id || isRead || isMarkingRead) return;
     setIsMarkingRead(true);
     try {
-      await supabase.rpc('mark_chapter_read', {
-        p_version_code: version,
-        p_book_slug: libro,
-        p_chapter_number: chapterNumber,
-      });
+      await UserChapterService.markChapterAsRead(
+        user.id,
+        version,
+        libro,
+        chapterNumber
+      );
       setIsRead(true);
       // Refrescar widgets (racha/progreso) en otras pantallas
       window.dispatchEvent(new Event('luz:reading-updated'));
@@ -413,17 +393,18 @@ export default function LeerCapituloPage() {
   };
 
   const handleToggleBookmarkVerse = async (verseNumber: number) => {
-    if (!isAuthenticated) return;
-    const { data } = await supabase.rpc('toggle_verse_bookmark', {
-      p_version_code: version,
-      p_book_slug: libro,
-      p_chapter_number: chapterNumber,
-      p_verse_number: verseNumber,
-    });
+    if (!isAuthenticated || !user?.id) return;
+    const isBookmarked = await UserChapterService.toggleVerseBookmark(
+      user.id,
+      version,
+      libro,
+      chapterNumber,
+      verseNumber
+    );
 
     setBookmarkedVerses((prev) => {
       const next = new Set(prev);
-      if (data) next.add(verseNumber);
+      if (isBookmarked) next.add(verseNumber);
       else next.delete(verseNumber);
       return next;
     });
