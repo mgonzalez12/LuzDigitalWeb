@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAppSelector } from '@/lib/hooks';
-import { supabase } from '@/lib/supabase';
+import { UserSettingsService } from '@/lib/services/userSettingsService';
 
 export function ReminderCard() {
   const { user } = useAppSelector((state) => state.auth);
@@ -16,15 +16,11 @@ export function ReminderCard() {
     if (!user?.id) return;
 
     const loadSettings = async () => {
-      const { data } = await supabase
-        .from('user_settings')
-        .select('reminders_enabled, reminder_time')
-        .eq('user_id', user.id)
-        .single();
+      const settings = await UserSettingsService.getUserSettings(user.id);
 
-      if (data) {
-        setEnabled(data.reminders_enabled || false);
-        const dbTime = data.reminder_time ? String(data.reminder_time).slice(0, 5) : '09:00';
+      if (settings) {
+        setEnabled(settings.reminders_enabled || false);
+        const dbTime = settings.reminder_time ? String(settings.reminder_time).slice(0, 5) : '09:00';
         setTime(dbTime);
         setTempTime(dbTime);
       }
@@ -40,12 +36,11 @@ export function ReminderCard() {
     setEnabled(newState);
     
     // Immediate save for toggle
-    await supabase.from('user_settings').upsert({
-      user_id: user.id,
+    await UserSettingsService.saveUserSettings(user.id, {
       reminders_enabled: newState,
       // If we are toggling, we might as well save the current time too just in case
       reminder_time: time
-    }, { onConflict: 'user_id' });
+    });
   };
 
   const handleSaveTime = async (e?: React.MouseEvent) => {
@@ -58,18 +53,10 @@ export function ReminderCard() {
       setTime(tempTime);
       setIsEditing(false);
       
-      const { error } = await supabase.from('user_settings').upsert({
-        user_id: user.id,
+      await UserSettingsService.saveUserSettings(user.id, {
         reminders_enabled: enabled,
         reminder_time: tempTime
-      }, { onConflict: 'user_id' });
-
-      if (error) {
-        console.error('Error saving settings:', error);
-        // Revert on error
-        setTime(time);
-        setIsEditing(true);
-      }
+      });
     } catch (error) {
       console.error('Error in handleSaveTime:', error);
       // Revert on error

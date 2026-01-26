@@ -1,6 +1,6 @@
 import { createMetadata } from '@/lib/seo';
 import type { Metadata } from 'next';
-import { supabase } from '@/lib/supabase';
+import { BibleChapterService } from '@/lib/services/bibleChapterService';
 
 interface Props {
   params: Promise<{
@@ -19,13 +19,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   let imageUrl: string | undefined;
 
   try {
-    const { data: chapterData } = await supabase
-      .from('bible_chapters')
-      .select('book_name, chapter_number, image_url')
-      .eq('version_code', version)
-      .eq('book_slug', libro)
-      .eq('chapter_number', parseInt(capitulo))
-      .maybeSingle();
+    const chapterData = await BibleChapterService.getChapterData(
+      version,
+      libro,
+      parseInt(capitulo)
+    );
 
     if (chapterData) {
       bookName = chapterData.book_name || libro;

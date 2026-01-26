@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAppSelector, useAppDispatch } from '@/lib/hooks';
 import { supabase } from '@/lib/supabase';
+import { UserNotificationsService } from '@/lib/services/userNotificationsService';
 import { setNotifications, markAsRead, removeNotification, Notification } from '@/lib/features/notificationSlice';
 import Link from 'next/link';
 
@@ -18,15 +19,12 @@ export function NotificationDropdown() {
     if (!user?.id) return;
 
     const loadNotifications = async () => {
-      const { data } = await supabase
-        .from('user_notifications')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(10); // Limit to keep it light
+      const notifications = await UserNotificationsService.getUserNotifications(user.id, {
+        limit: 10,
+      });
 
-      if (data) {
-        dispatch(setNotifications(data as Notification[]));
+      if (notifications) {
+        dispatch(setNotifications(notifications as Notification[]));
       }
     };
 
@@ -69,13 +67,13 @@ export function NotificationDropdown() {
 
   const handleMarkAsRead = async (id: string) => {
     dispatch(markAsRead(id));
-    await supabase.from('user_notifications').update({ is_read: true }).eq('id', id);
+    await UserNotificationsService.markAsRead(id);
   };
 
   const handleRemove = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     dispatch(removeNotification(id));
-    await supabase.from('user_notifications').delete().eq('id', id);
+    await UserNotificationsService.deleteNotification(id);
   };
 
   return (
