@@ -30,6 +30,9 @@ export default function LeerCapituloPage() {
   const [streakDays, setStreakDays] = useState(0);
   const [bookmarkedVerses, setBookmarkedVerses] = useState<Set<number>>(new Set());
   const [verseFontSize, setVerseFontSize] = useState(18);
+  const [showShareMenu, setShowShareMenu] = useState(false);
+  const [copyFeedback, setCopyFeedback] = useState(false);
+  const shareMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (version && libro && capitulo) {
@@ -175,6 +178,20 @@ export default function LeerCapituloPage() {
     };
   }, [isAuthenticated, user?.id]);
 
+  // Cerrar menú de compartir al hacer click fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (shareMenuRef.current && !shareMenuRef.current.contains(event.target as Node)) {
+        setShowShareMenu(false);
+      }
+    };
+
+    if (showShareMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showShareMenu]);
+
   // Nota: NO marcamos como leído automáticamente.
   // El usuario debe presionar "Marcar como leído".
 
@@ -240,6 +257,134 @@ export default function LeerCapituloPage() {
   const handleDecreaseFont = () => setVerseFontSize((s) => Math.max(14, s - 1));
   const handleIncreaseFont = () => setVerseFontSize((s) => Math.min(26, s + 1));
 
+  // Generar texto completo del capítulo para compartir
+  const getChapterText = () => {
+    if (!currentChapter) return '';
+    const verses = currentChapter.vers.map(v => `${v.number} ${v.verse}`).join(' ');
+    return `${bookName} ${currentChapter.chapter}\n\n${verses}`;
+  };
+
+  // Funciones de compartir
+  const handleShareTwitter = () => {
+    const text = getChapterText();
+    const url = window.location.href;
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+    window.open(twitterUrl, '_blank', 'width=550,height=420');
+    setShowShareMenu(false);
+  };
+
+  const handleShareFacebook = async () => {
+    const text = getChapterText();
+    const url = window.location.href;
+    
+    // Abrir Facebook directamente (NO usar navigator.share para Facebook)
+    // Nota: Facebook no permite pasar texto directamente en la URL por seguridad
+    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+    window.open(facebookUrl, '_blank', 'width=550,height=420');
+    
+    // Copiar el texto completo al portapapeles automáticamente
+    // El usuario puede pegar el texto en el cuadro de publicación de Facebook
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopyFeedback(true);
+      setTimeout(() => setCopyFeedback(false), 5000);
+    } catch (err) {
+      console.error('Error al copiar texto:', err);
+      // Fallback para navegadores antiguos
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.opacity = '0';
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        setCopyFeedback(true);
+        setTimeout(() => setCopyFeedback(false), 5000);
+      } catch (fallbackErr) {
+        console.error('Error en fallback de copiar:', fallbackErr);
+      }
+      document.body.removeChild(textArea);
+    }
+    
+    setShowShareMenu(false);
+  };
+
+  const handleShareEmail = () => {
+    const text = getChapterText();
+    const url = window.location.href;
+    const subject = encodeURIComponent(`${bookName} ${currentChapter.chapter}`);
+    const body = encodeURIComponent(`${text}\n\n${url}`);
+    const mailtoUrl = `mailto:?subject=${subject}&body=${body}`;
+    window.location.href = mailtoUrl;
+    setShowShareMenu(false);
+  };
+
+  const handleCopyText = async () => {
+    const text = getChapterText();
+    if (!text) {
+      console.error('No hay texto para copiar');
+      return;
+    }
+
+    // Verificar si estamos en un contexto seguro (HTTPS o localhost)
+    const isSecureContext = window.isSecureContext || location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    
+    // Intentar usar la API moderna del portapapeles
+    if (isSecureContext && navigator.clipboard && navigator.clipboard.writeText) {
+      try {
+        await navigator.clipboard.writeText(text);
+        setCopyFeedback(true);
+        setTimeout(() => setCopyFeedback(false), 3000);
+        return;
+      } catch (err: any) {
+        // Si falla, continuar con el fallback
+        console.log('Clipboard API falló, usando fallback:', err.message);
+      }
+    }
+
+    // Fallback: usar textarea y execCommand
+    try {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      textArea.setAttribute('readonly', '');
+      document.body.appendChild(textArea);
+      
+      // Seleccionar el texto
+      if (navigator.userAgent.match(/ipad|iphone/i)) {
+        // Para iOS
+        const range = document.createRange();
+        range.selectNodeContents(textArea);
+        const selection = window.getSelection();
+        if (selection) {
+          selection.removeAllRanges();
+          selection.addRange(range);
+        }
+        textArea.setSelectionRange(0, 999999);
+      } else {
+        textArea.select();
+      }
+      
+      // Copiar
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+      
+      if (successful) {
+        setCopyFeedback(true);
+        setTimeout(() => setCopyFeedback(false), 3000);
+      } else {
+        console.error('No se pudo copiar el texto');
+        alert('No se pudo copiar el texto. Por favor, selecciónalo manualmente.');
+      }
+    } catch (fallbackErr) {
+      console.error('Error en fallback de copiar:', fallbackErr);
+      alert('Error al copiar. Por favor, selecciona y copia el texto manualmente.');
+    }
+  };
+
   const handleToggleFavorite = async () => {
     if (!isAuthenticated) return;
     const { data } = await supabase.rpc('toggle_chapter_favorite', {
@@ -297,10 +442,20 @@ export default function LeerCapituloPage() {
       {/* Main Content */}
       <main className="flex-1 relative z-10 pb-32 pt-24">
         <div className="max-w-full md:max-w-5xl lg:max-w-4xl mx-auto px-4 md:px-6 lg:px-8 py-8 md:py-12 space-y-8">
+          {/* Toast de feedback para copiar */}
+          {copyFeedback && (
+            <div className="fixed top-36 right-4 z-[10001] bg-green-500 text-white px-6 py-3 rounded-lg shadow-2xl flex items-center gap-3 animate-in slide-in-from-top-5">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <span className="font-medium">Texto copiado al portapapeles</span>
+            </div>
+          )}
+
           {/* Top Bar Card */}
-          <div className="bg-slate-900/35 backdrop-blur-sm border border-slate-800/60 rounded-3xl p-6 md:p-8 relative overflow-hidden">
+          <div className="bg-slate-900/35 backdrop-blur-sm border border-slate-800/60 rounded-3xl p-6 md:p-8 relative">
             <div
-              className="absolute inset-0 opacity-40 pointer-events-none"
+              className="absolute inset-0 opacity-40 pointer-events-none rounded-3xl overflow-hidden"
               style={{
                 backgroundImage:
                   "radial-gradient(circle at 20% 0%, rgba(245,158,11,0.08), transparent 60%), radial-gradient(circle at 70% 20%, rgba(59,130,246,0.10), transparent 60%)",
@@ -323,7 +478,7 @@ export default function LeerCapituloPage() {
               </nav>
 
               {/* Actions */}
-              <div className="flex items-center gap-2 md:gap-4 flex-wrap">
+              <div className="flex items-center gap-2 md:gap-4 flex-wrap relative">
                 {/* Streak */}
                 <div className="flex items-center gap-2 px-3 md:px-4 py-2 bg-orange-500/10 border border-orange-500/20 rounded-lg">
                   <svg className="w-4 h-4 text-orange-500" fill="currentColor" viewBox="0 0 24 24">
@@ -334,10 +489,70 @@ export default function LeerCapituloPage() {
                   </span>
                 </div>
 
-                {/* Share Button */}
-                <button className="px-4 md:px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs md:text-sm font-medium rounded-lg transition-all whitespace-nowrap">
-                  Compartir Versículo
+                {/* Copy Button - Solo icono */}
+                <button
+                  onClick={handleCopyText}
+                  className="px-3 py-2 bg-slate-800/50 hover:bg-slate-700/50 text-slate-200 rounded-lg transition-all flex items-center justify-center"
+                  title="Copiar texto del capítulo"
+                  aria-label="Copiar texto del capítulo"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
                 </button>
+
+                {/* Share Button */}
+                <div className="relative" ref={shareMenuRef} style={{ zIndex: 100 }}>
+                  <button 
+                    onClick={() => setShowShareMenu(!showShareMenu)}
+                    className="px-4 md:px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs md:text-sm font-medium rounded-lg transition-all whitespace-nowrap"
+                  >
+                    Compartir Versículo
+                  </button>
+                  
+                  {showShareMenu && (
+                    <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-2xl border border-gray-200" style={{ zIndex: 10000 }}>
+                      {/* Triángulo indicador (apunta hacia arriba) */}
+                      <div className="absolute -top-2 right-4 w-4 h-4 bg-white border-l border-t border-gray-200 transform rotate-45"></div>
+                      
+                      <button
+                        onClick={handleShareTwitter}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="w-8 h-8 rounded-full bg-blue-400 flex items-center justify-center flex-shrink-0">
+                          <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                          </svg>
+                        </div>
+                        <span>Twitter</span>
+                      </button>
+                      
+                      <button
+                        onClick={handleShareFacebook}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0">
+                          <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                          </svg>
+                        </div>
+                        <span>Facebook</span>
+                      </button>
+                      
+                      <button
+                        onClick={handleShareEmail}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center flex-shrink-0">
+                          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <span>Email</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>

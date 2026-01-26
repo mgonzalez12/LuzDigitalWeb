@@ -18,6 +18,11 @@ export const metadata: Metadata = {
   description: "Una experiencia digital moderna y open-source para el cristiano contemporáneo. Sumérgete en la espiritualidad con diseño de alta tecnología.",
   keywords: ["Biblia", "lectura bíblica", "cristiano", "espiritualidad", "open-source", "digital"],
   authors: [{ name: "Luz Digital" }],
+  icons: {
+    icon: '/icono_luz_digital.ico',
+    shortcut: '/icono_luz_digital.ico',
+    apple: '/icono_luz_digital.ico',
+  },
   openGraph: {
     title: "Luz Digital - La Palabra en Nueva Luz",
     description: "Una experiencia digital moderna y open-source para el cristiano contemporáneo.",

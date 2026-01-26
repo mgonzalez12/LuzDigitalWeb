@@ -354,7 +354,7 @@ function DashboardHome() {
 
       <HorizontalNavbar />
 
-      <main className="flex-1 relative z-10 px-4 md:px-8 py-10 pt-24">
+      <main className="flex-1 relative z-10 px-4 md:px-8 py-10 pt-36">
         <div className="max-w-7xl mx-auto">
           {/* Header profile */}
           <div className="bg-slate-900/35 backdrop-blur-sm border border-slate-800/60 rounded-3xl p-8 mb-8 relative overflow-hidden">
@@ -387,12 +387,7 @@ function DashboardHome() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <button
-                  className="w-11 h-11 rounded-2xl bg-slate-950/40 border border-slate-700/50 text-slate-200 hover:bg-slate-800/50 transition-all"
-                  aria-label="Notificaciones"
-                >
-                  🔔
-                </button>
+               
                 <Link
                   href="/configuracion"
                   className="w-11 h-11 rounded-2xl bg-slate-950/40 border border-slate-700/50 text-slate-200 hover:bg-slate-800/50 transition-all flex items-center justify-center"
@@ -407,7 +402,7 @@ function DashboardHome() {
           {/* Stats */}
           <div className="mb-6">
             <h2 className="text-2xl font-semibold mb-4">Tus Estadísticas</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <ReadingStreak />
               <div className="bg-slate-900/35 border border-slate-800/60 rounded-2xl p-6">
                 <div className="flex items-center justify-between">
@@ -488,7 +483,7 @@ function DashboardHome() {
           </div>
 
           {/* Bottom Row: Sonidos, Recordatorio Suave, Configuración Rápida */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
             <AmbientSoundCard />
             <ReminderCard />
             <div className="bg-slate-900/35 border border-slate-800/60 rounded-3xl p-6">
