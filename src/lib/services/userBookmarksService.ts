@@ -1,11 +1,13 @@
 import { supabase } from '../supabase';
 import { CacheService } from './cacheService';
 
-export interface FavoriteRow {
+export interface BookmarkRow {
   user_id: string;
   version_code: string;
   book_slug: string;
   chapter_number: number;
+  verse_number: number;
+  note: string | null;
   created_at: string;
 }
 
@@ -14,7 +16,6 @@ export interface BookMeta {
   slug: string;
   name: string;
   testament: 'old' | 'new';
-  chapter_count: number;
 }
 
 export interface ChapterData {
@@ -25,53 +26,52 @@ export interface ChapterData {
   vers: Array<{ number: number; verse: string }>;
 }
 
-type FavoritesWithData = {
-  favorites: FavoriteRow[];
+type BookmarksWithData = {
+  bookmarks: BookmarkRow[];
   booksMeta: Map<string, BookMeta>;
   chapterCache: Map<string, ChapterData>;
 };
 
-// Serializable version for sessionStorage (Maps can't be serialized)
-type FavoritesWithDataRaw = {
-  favorites: FavoriteRow[];
+type BookmarksWithDataRaw = {
+  bookmarks: BookmarkRow[];
   booksMeta: [string, BookMeta][];
   chapterCache: [string, ChapterData][];
 };
 
-function toRaw(d: FavoritesWithData): FavoritesWithDataRaw {
+function toRaw(d: BookmarksWithData): BookmarksWithDataRaw {
   return {
-    favorites: d.favorites,
+    bookmarks: d.bookmarks,
     booksMeta: Array.from(d.booksMeta.entries()),
     chapterCache: Array.from(d.chapterCache.entries()),
   };
 }
 
-function fromRaw(r: FavoritesWithDataRaw): FavoritesWithData {
+function fromRaw(r: BookmarksWithDataRaw): BookmarksWithData {
   return {
-    favorites: r.favorites,
+    bookmarks: r.bookmarks,
     booksMeta: new Map(r.booksMeta),
     chapterCache: new Map(r.chapterCache),
   };
 }
 
 function cacheKey(userId: string) {
-  return `favorites_${userId}`;
+  return `bookmarks_${userId}`;
 }
 
-export class UserFavoritesService {
-  static async getUserFavorites(userId: string): Promise<FavoriteRow[]> {
+export class UserBookmarksService {
+  static async getUserBookmarks(userId: string): Promise<BookmarkRow[]> {
     const { data, error } = await supabase
-      .from('user_chapter_favorites')
+      .from('user_verse_bookmarks')
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching user favorites:', error);
+      console.error('Error fetching user bookmarks:', error);
       return [];
     }
 
-    return (data ?? []) as FavoriteRow[];
+    return (data ?? []) as BookmarkRow[];
   }
 
   static async getBooksMeta(versionCodes: string[]): Promise<Map<string, BookMeta>> {
@@ -79,7 +79,7 @@ export class UserFavoritesService {
 
     const { data, error } = await supabase
       .from('bible_books')
-      .select('version_code,slug,name,testament,chapter_count')
+      .select('version_code,slug,name,testament')
       .in('version_code', versionCodes);
 
     if (error) {
@@ -93,10 +93,10 @@ export class UserFavoritesService {
   }
 
   static async getChaptersData(
-    favorites: FavoriteRow[],
+    bookmarks: BookmarkRow[],
     signal?: AbortSignal
   ): Promise<Map<string, ChapterData>> {
-    const keys = favorites.map(
+    const keys = bookmarks.map(
       (r) => `${r.version_code}:${r.book_slug}:${r.chapter_number}`
     );
     const uniqueKeys = Array.from(new Set(keys));
@@ -119,56 +119,49 @@ export class UserFavoritesService {
     return cache;
   }
 
-  static async deleteFavorite(
+  static async deleteBookmark(
     userId: string,
     versionCode: string,
     bookSlug: string,
-    chapterNumber: number
+    chapterNumber: number,
+    verseNumber: number
   ): Promise<void> {
     const { error } = await supabase
-      .from('user_chapter_favorites')
+      .from('user_verse_bookmarks')
       .delete()
       .eq('user_id', userId)
       .eq('version_code', versionCode)
       .eq('book_slug', bookSlug)
-      .eq('chapter_number', chapterNumber);
+      .eq('chapter_number', chapterNumber)
+      .eq('verse_number', verseNumber);
 
     if (error) {
-      console.error('Error deleting favorite:', error);
+      console.error('Error deleting bookmark:', error);
       throw error;
     }
 
-    // Invalidar caché al eliminar
     CacheService.invalidate(cacheKey(userId));
   }
 
   /**
-   * Obtiene favoritos con caché en memoria.
-   * Si hay datos en caché los devuelve inmediatamente.
-   * Siempre re-valida en background y solo actualiza si hay cambios.
+   * Obtiene marcadores con caché en memoria.
+   * Devuelve caché instantáneamente y re-valida en background.
    */
-  static async getFavoritesWithData(
+  static async getBookmarksWithData(
     userId: string,
     signal?: AbortSignal
-  ): Promise<FavoritesWithData> {
-    // 1. Intentar devolver caché
-    const cached = CacheService.get<FavoritesWithDataRaw>(cacheKey(userId));
+  ): Promise<BookmarksWithData> {
+    const cached = CacheService.get<BookmarksWithDataRaw>(cacheKey(userId));
     if (cached) {
-      // Re-validar en background (stale-while-revalidate)
       this.revalidateInBackground(userId);
       return fromRaw(cached);
     }
 
-    // 2. Sin caché: consultar normalmente
     const result = await this.fetchFresh(userId, signal);
-
-    // 3. Guardar en caché
     CacheService.set(cacheKey(userId), toRaw(result));
-
     return result;
   }
 
-  /** Invalida el caché de favoritos del usuario (llamar al agregar/quitar favoritos desde otras pantallas) */
   static invalidateCache(userId: string) {
     CacheService.invalidate(cacheKey(userId));
   }
@@ -176,34 +169,32 @@ export class UserFavoritesService {
   private static async fetchFresh(
     userId: string,
     signal?: AbortSignal
-  ): Promise<FavoritesWithData> {
-    const favorites = await this.getUserFavorites(userId);
+  ): Promise<BookmarksWithData> {
+    const bookmarks = await this.getUserBookmarks(userId);
 
-    if (favorites.length === 0) {
-      return { favorites: [], booksMeta: new Map(), chapterCache: new Map() };
+    if (bookmarks.length === 0) {
+      return { bookmarks: [], booksMeta: new Map(), chapterCache: new Map() };
     }
 
-    const versions = Array.from(new Set(favorites.map((r) => r.version_code)));
+    const versions = Array.from(new Set(bookmarks.map((r) => r.version_code)));
 
     const [booksMeta, chapterCache] = await Promise.all([
       this.getBooksMeta(versions),
-      this.getChaptersData(favorites, signal),
+      this.getChaptersData(bookmarks, signal),
     ]);
 
-    return { favorites, booksMeta, chapterCache };
+    return { bookmarks, booksMeta, chapterCache };
   }
 
   private static async revalidateInBackground(userId: string) {
     try {
       const fresh = await this.fetchFresh(userId);
-      const cached = CacheService.get<FavoritesWithDataRaw>(cacheKey(userId));
+      const cached = CacheService.get<BookmarksWithDataRaw>(cacheKey(userId));
 
-      // Solo actualizar caché si la cantidad de favoritos cambió
-      const cachedCount = cached?.favorites?.length ?? -1;
-      if (fresh.favorites.length !== cachedCount) {
+      const cachedCount = cached?.bookmarks?.length ?? -1;
+      if (fresh.bookmarks.length !== cachedCount) {
         CacheService.set(cacheKey(userId), toRaw(fresh));
-        // Disparar evento para que la UI se actualice si está montada
-        window.dispatchEvent(new CustomEvent('luz:favorites-updated'));
+        window.dispatchEvent(new CustomEvent('luz:bookmarks-updated'));
       }
     } catch {
       // Background revalidation falló, no pasa nada

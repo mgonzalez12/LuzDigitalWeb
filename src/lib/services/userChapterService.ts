@@ -1,14 +1,8 @@
 import { supabase } from '../supabase';
+import { UserFavoritesService } from './userFavoritesService';
+import { UserBookmarksService } from './userBookmarksService';
 
-/**
- * Servicio para operaciones de usuario relacionadas con capítulos
- * (favoritos, lectura, bookmarks)
- */
 export class UserChapterService {
-  /**
-   * Alterna el estado de favorito de un capítulo
-   * @returns true si el capítulo es favorito después de la operación, false si no
-   */
   static async toggleChapterFavorite(
     userId: string,
     versionCode: string,
@@ -25,6 +19,8 @@ export class UserChapterService {
       console.error('Error toggling chapter favorite:', error);
       return false;
     }
+
+    UserFavoritesService.invalidateCache(userId);
 
     return !!data;
   }
@@ -72,6 +68,8 @@ export class UserChapterService {
       console.error('Error toggling verse bookmark:', error);
       return false;
     }
+
+    UserBookmarksService.invalidateCache(userId);
 
     return !!data;
   }
