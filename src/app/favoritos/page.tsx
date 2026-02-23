@@ -71,7 +71,6 @@ export default function FavoritosPage() {
 
       setIsLoading(true);
 
-      // Usar el servicio optimizado que hace todo en paralelo
       const { favorites: rows, booksMeta: metaMap, chapterCache: newCache } =
         await UserFavoritesService.getFavoritesWithData(user.id, controller.signal);
 
@@ -83,9 +82,15 @@ export default function FavoritosPage() {
     };
 
     load();
+
+    // Escuchar re-validaciones en background
+    const onUpdated = () => { if (!cancelled) load(); };
+    window.addEventListener('luz:favorites-updated', onUpdated);
+
     return () => {
       cancelled = true;
       controller.abort();
+      window.removeEventListener('luz:favorites-updated', onUpdated);
     };
   }, [isAuthenticated, user?.id]);
 

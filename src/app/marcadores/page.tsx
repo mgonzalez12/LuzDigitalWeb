@@ -4,33 +4,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { HorizontalNavbar } from '@/components/HorizontalNavbar';
-import { supabase } from '@/lib/supabase';
+import { UserBookmarksService, BookmarkRow, BookMeta, ChapterData } from '@/lib/services/userBookmarksService';
 import { useAppSelector } from '@/lib/hooks';
-
-type BookmarkRow = {
-  user_id: string;
-  version_code: string;
-  book_slug: string;
-  chapter_number: number;
-  verse_number: number;
-  note: string | null;
-  created_at: string;
-};
-
-type BookMeta = {
-  version_code: string;
-  slug: string;
-  name: string;
-  testament: 'old' | 'new';
-};
-
-type ChapterData = {
-  testament: string;
-  name: string;
-  num_chapters: number;
-  chapter: number;
-  vers: Array<{ number: number; verse: string }>;
-};
 
 type ViewMode = 'grid' | 'list';
 type TestamentFilter = 'all' | 'old' | 'new';
@@ -94,64 +69,25 @@ export default function MarcadoresPage() {
 
       setIsLoading(true);
 
-      const { data: bm, error: bmError } = await supabase
-        .from('user_verse_bookmarks')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (bmError) {
-        console.error(bmError);
-      }
-
-      const bookmarksRows = (bm ?? []) as BookmarkRow[];
-
-      // Cargar metadatos de libros (solo versiones presentes)
-      const versions = Array.from(new Set(bookmarksRows.map((r) => r.version_code)));
-      let metaMap = new Map<string, BookMeta>();
-      if (versions.length > 0) {
-        const { data: books } = await supabase
-          .from('bible_books')
-          .select('version_code,slug,name,testament')
-          .in('version_code', versions);
-        metaMap = new Map(
-          (books ?? []).map((b: any) => [`${b.version_code}:${b.slug}`, b as BookMeta])
-        );
-      }
-
-      // Traer capítulos agrupados para resolver texto del versículo
-      const uniqueChapters = Array.from(
-        new Set(bookmarksRows.map((r) => `${r.version_code}:${r.book_slug}:${r.chapter_number}`))
-      );
-
-      const newCache = new Map<string, ChapterData>();
-      for (const key of uniqueChapters) {
-        // eslint-disable-next-line no-await-in-loop
-        const [v, b, ch] = key.split(':');
-        try {
-          const res = await fetch(`https://bible-api.deno.dev/api/read/${v}/${b}/${ch}`, {
-            signal: controller.signal,
-          });
-          if (!res.ok) continue;
-          // eslint-disable-next-line no-await-in-loop
-          const data = (await res.json()) as ChapterData;
-          newCache.set(key, data);
-        } catch (e) {
-          // abort / network
-        }
-      }
+      const { bookmarks: rows, booksMeta: metaMap, chapterCache: newCache } =
+        await UserBookmarksService.getBookmarksWithData(user.id, controller.signal);
 
       if (cancelled) return;
-      setBookmarks(bookmarksRows);
+      setBookmarks(rows);
       setBooksMeta(metaMap);
       setChapterCache(newCache);
       setIsLoading(false);
     };
 
     load();
+
+    const onUpdated = () => { if (!cancelled) load(); };
+    window.addEventListener('luz:bookmarks-updated', onUpdated);
+
     return () => {
       cancelled = true;
       controller.abort();
+      window.removeEventListener('luz:bookmarks-updated', onUpdated);
     };
   }, [isAuthenticated, user?.id]);
 
@@ -217,14 +153,13 @@ export default function MarcadoresPage() {
   };
 
   const handleDelete = async (r: BookmarkRow) => {
-    await supabase
-      .from('user_verse_bookmarks')
-      .delete()
-      .eq('user_id', r.user_id)
-      .eq('version_code', r.version_code)
-      .eq('book_slug', r.book_slug)
-      .eq('chapter_number', r.chapter_number)
-      .eq('verse_number', r.verse_number);
+    await UserBookmarksService.deleteBookmark(
+      r.user_id,
+      r.version_code,
+      r.book_slug,
+      r.chapter_number,
+      r.verse_number
+    );
 
     setOpenMenuKey(null);
     setBookmarks((prev) =>
