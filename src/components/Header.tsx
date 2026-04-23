@@ -14,19 +14,16 @@ export function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
             <img
-              src="/prueba_logo_luzDigital_sin_fondo.png"
+              src="/luzDigital_Icono.png"
               alt="Luz Digital"
               className="flex-shrink-0"
               style={{
-                width: '80px !important',
-                    height: '60px !important',
-                    minWidth: '60px',
-                    minHeight: '60px',
-                    maxWidth: '80px',
-                    maxHeight: '60px',
-                    objectFit: 'contain',
-                    display: 'block',
-                    flexShrink: 0
+                width: '40px',
+                height: '40px',
+                objectFit: 'contain',
+                display: 'block',
+                flexShrink: 0,
+                borderRadius: '50%'
               }}
             />
             <span className="text-lg font-semibold">Luz Digital</span>
