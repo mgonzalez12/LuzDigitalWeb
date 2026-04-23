@@ -67,19 +67,16 @@ export default function HomeNavbar() {
           <div className="flex items-center justify-between p-5 border-b border-white/10 bg-[#0a0a0f]/50 backdrop-blur-sm sticky top-0 z-10">
             <Link href="/" className="flex items-center gap-3" onClick={() => setMobileMenuOpen(false)}>
               <img
-                src="/prueba_logo_luzDigital_sin_fondo.png"
+                src="/luzDigital_Icono.png"
                 alt="Luz Digital"
                 className="flex-shrink-0"
                 style={{
-                  width: '80px !important',
-                    height: '60px !important',
-                    minWidth: '60px',
-                    minHeight: '60px',
-                    maxWidth: '80px',
-                    maxHeight: '60px',
-                    objectFit: 'contain',
-                    display: 'block',
-                    flexShrink: 0
+                  width: '40px',
+                  height: '40px',
+                  objectFit: 'contain',
+                  display: 'block',
+                  flexShrink: 0,
+                  borderRadius: '50%'
                 }}
               />
               <span className="text-lg font-semibold text-white">Luz Digital</span>
@@ -149,19 +146,16 @@ export default function HomeNavbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3">
             <img
-              src="/prueba_logo_luzDigital_sin_fondo.png"
+              src="/luzDigital_Icono.png"
               alt="Luz Digital"
               className="flex-shrink-0"
               style={{
-                width: '80px !important',
-                    height: '60px !important',
-                    minWidth: '60px',
-                    minHeight: '60px',
-                    maxWidth: '80px',
-                    maxHeight: '60px',
-                    objectFit: 'contain',
-                    display: 'block',
-                    flexShrink: 0
+                width: '40px',
+                height: '40px',
+                objectFit: 'contain',
+                display: 'block',
+                flexShrink: 0,
+                borderRadius: '50%'
               }}
             />
             <span className="text-lg font-semibold text-white">Luz Digital</span>

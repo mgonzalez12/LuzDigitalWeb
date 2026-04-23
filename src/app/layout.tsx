@@ -20,9 +20,9 @@ export const metadata: Metadata = {
     telephone: false,
   },
   icons: {
-    icon: '/icono_luz_digital.ico',
-    shortcut: '/icono_luz_digital.ico',
-    apple: '/icono_luz_digital.ico',
+    icon: '/luzDigital_Icono.png',
+    shortcut: '/luzDigital_Icono.png',
+    apple: '/luzDigital_Icono.png',
   },
   openGraph: {
     type: "website",

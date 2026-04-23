@@ -102,19 +102,16 @@ export function Sidebar() {
         <div className="p-6 border-b border-slate-700/50">
           <Link href="/" className="flex items-center gap-3 group">
             <img
-              src="/prueba_logo_luzDigital_sin_fondo.png"
+              src="/luzDigital_Icono.png"
               alt="Luz Digital"
               className="flex-shrink-0"
               style={{
-                width: '60px !important',
-                height: '60px !important',
-                minWidth: '60px',
-                minHeight: '60px',
-                maxWidth: '60px',
-                maxHeight: '60px',
+                width: '40px',
+                height: '40px',
                 objectFit: 'contain',
                 display: 'block',
-                flexShrink: 0
+                flexShrink: 0,
+                borderRadius: '50%'
               }}
             />
             <div>
