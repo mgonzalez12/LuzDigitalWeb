@@ -81,6 +81,28 @@ export const loginWithGoogle = createAsyncThunk(
   }
 );
 
+// Thunk para solicitar recuperación de contraseña (envía email)
+export const requestPasswordReset = createAsyncThunk(
+  'auth/requestPasswordReset',
+  async ({ email }: { email: string }) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/restablecer-contrasena`,
+    });
+    if (error) throw error;
+    return { email };
+  }
+);
+
+// Thunk para actualizar la contraseña (requiere sesión de recuperación activa)
+export const updatePassword = createAsyncThunk(
+  'auth/updatePassword',
+  async ({ password }: { password: string }) => {
+    const { data, error } = await supabase.auth.updateUser({ password });
+    if (error) throw error;
+    return data;
+  }
+);
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -159,6 +181,38 @@ const authSlice = createSlice({
       .addCase(logout.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Error al cerrar sesión';
+      });
+
+    // requestPasswordReset
+    builder
+      .addCase(requestPasswordReset.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(requestPasswordReset.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(requestPasswordReset.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Error al enviar el correo de recuperación';
+      });
+
+    // updatePassword
+    builder
+      .addCase(updatePassword.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updatePassword.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload.user;
+        state.isAuthenticated = !!action.payload.user;
+        state.error = null;
+      })
+      .addCase(updatePassword.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Error al actualizar la contraseña';
       });
   },
 });
