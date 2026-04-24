@@ -3,9 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useAppSelector } from '@/lib/hooks';
 import { UserReadingService } from '@/lib/services/userReadingService';
+import { buildReadingWeekUtc, type ReadingWeekCell } from '@/lib/readingStreakUtc';
 
 export function ReadingStreak() {
   const [streak, setStreak] = useState(0);
+  const [weekCells, setWeekCells] = useState<ReadingWeekCell[]>(() => buildReadingWeekUtc([]).week);
   const [showCelebration, setShowCelebration] = useState(false);
   const [hasReadToday, setHasReadToday] = useState(false);
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
@@ -14,27 +16,6 @@ export function ReadingStreak() {
     let cancelled = false;
 
     const parseDayUtc = (day: string) => new Date(`${day}T00:00:00.000Z`);
-
-    const computeStreakFromDays = (days: Array<{ day: string }>) => {
-      const daySet = new Set(days.map((d) => d.day)); // YYYY-MM-DD
-      // Usamos UTC para alinear con Postgres `current_date` (Supabase corre en UTC).
-      const toKeyUtc = (d: Date) => d.toISOString().slice(0, 10);
-
-      const current = new Date();
-      current.setUTCHours(0, 0, 0, 0);
-      let count = 0;
-
-      while (daySet.has(toKeyUtc(current))) {
-        count += 1;
-        current.setTime(current.getTime() - 86400000);
-      }
-
-      return count;
-    };
-
-    const todayKey = () => {
-      return new Date().toISOString().slice(0, 10);
-    };
 
     const daysDiffUtc = (a: Date, b: Date) => {
       const ms = a.getTime() - b.getTime();
@@ -45,6 +26,7 @@ export function ReadingStreak() {
       if (!isAuthenticated || !user?.id) {
         if (!cancelled) {
           setStreak(0);
+          setWeekCells(buildReadingWeekUtc([]).week);
           setHasReadToday(false);
         }
         return;
@@ -53,11 +35,11 @@ export function ReadingStreak() {
       const readingDays = await UserReadingService.getReadingDays(user.id);
 
       if (cancelled) return;
-      const days = readingDays.slice(0, 60).map(d => ({ day: d.day }));
+      const dayStrings = readingDays.slice(0, 60).map((d) => d.day);
 
       // Si pasaron más de 4 días sin registrar lectura, resetear la racha (borrar registros)
-      if (days.length > 0) {
-        const lastDay = parseDayUtc(days[0].day);
+      if (dayStrings.length > 0) {
+        const lastDay = parseDayUtc(dayStrings[0]);
         const todayUtc = new Date();
         todayUtc.setUTCHours(0, 0, 0, 0);
         const diff = daysDiffUtc(todayUtc, lastDay);
@@ -65,13 +47,16 @@ export function ReadingStreak() {
           await UserReadingService.clearReadingDays(user.id);
           if (cancelled) return;
           setStreak(0);
+          setWeekCells(buildReadingWeekUtc([]).week);
           setHasReadToday(false);
           return;
         }
       }
 
-      setStreak(computeStreakFromDays(days));
-      setHasReadToday(new Set(days.map((d) => d.day)).has(todayKey()));
+      const { week, streak: streakVal, todayKey: tk } = buildReadingWeekUtc(dayStrings);
+      setStreak(streakVal);
+      setWeekCells(week);
+      setHasReadToday(new Set(dayStrings).has(tk));
     };
 
     load();
@@ -125,15 +110,25 @@ export function ReadingStreak() {
         </div>
         
         <div className="flex gap-1 mb-4">
-          {[...Array(7)].map((_, i) => (
-            <div
-              key={i}
-              className={`flex-1 h-2 rounded-full transition-all ${
-                i < (streak % 7) 
-                  ? 'bg-blue-500' 
-                  : 'bg-slate-200 dark:bg-zinc-800'
-              }`}
-            />
+          {weekCells.map((cell) => (
+            <div key={cell.day} className="flex-1 flex flex-col items-center gap-1.5 min-w-0">
+              <div
+                className={`w-full rounded-full transition-all ${
+                  cell.is_streak
+                    ? 'h-6 bg-blue-500'
+                    : cell.is_today
+                      ? 'h-6 bg-blue-200 dark:bg-blue-900/45'
+                      : 'h-1.5 bg-slate-200 dark:bg-zinc-800'
+                }`}
+              />
+              <span
+                className={`text-[10px] font-semibold ${
+                  cell.is_today ? 'text-blue-500' : 'text-slate-400 dark:text-gray-500'
+                }`}
+              >
+                {cell.weekday}
+              </span>
+            </div>
           ))}
         </div>
 

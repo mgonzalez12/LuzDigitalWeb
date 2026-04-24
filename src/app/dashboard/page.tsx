@@ -13,6 +13,7 @@ import { UserStatsService } from "@/lib/services/userStatsService";
 import { UserReadingService } from "@/lib/services/userReadingService";
 import { UserSettingsService } from "@/lib/services/userSettingsService";
 import { setSound, togglePlay, AmbientSoundType } from "@/lib/features/audioSlice";
+import { computeStreakUtc } from "@/lib/readingStreakUtc";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -79,18 +80,6 @@ function timeAgoEs(iso: string) {
   if (hrs < 24) return `Hace ${hrs} horas`;
   const days = Math.floor(hrs / 24);
   return `Hace ${days} días`;
-}
-
-function computeStreakUtc(days: string[]) {
-  const set = new Set(days);
-  const cur = new Date();
-  cur.setUTCHours(0, 0, 0, 0);
-  let count = 0;
-  while (set.has(cur.toISOString().slice(0, 10))) {
-    count += 1;
-    cur.setTime(cur.getTime() - 86400000);
-  }
-  return count;
 }
 
 function DashboardHome() {
