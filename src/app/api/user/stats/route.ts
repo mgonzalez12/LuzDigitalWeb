@@ -19,8 +19,17 @@ export async function GET(req: Request) {
   const twoWeeksAgo = new Date(today);
   twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 13);
 
-  const [chaptersRes, versesRes, daysRes, recentRes, allProgressRes, chaptersForBooksRes, lastReadRes] =
-    await Promise.all([
+  const [
+    chaptersRes,
+    versesRes,
+    daysRes,
+    activeDaysRes,
+    recentRes,
+    allProgressRes,
+    chaptersForBooksRes,
+    lastReadRes,
+    settingsRes,
+  ] = await Promise.all([
       ctx.client
         .from('user_chapter_progress')
         .select('*', { head: true, count: 'exact' }),
@@ -31,7 +40,10 @@ export async function GET(req: Request) {
         .from('user_reading_days')
         .select('day')
         .order('day', { ascending: false })
-        .limit(60),
+        .limit(400),
+      ctx.client
+        .from('user_reading_days')
+        .select('*', { head: true, count: 'exact' }),
       ctx.client
         .from('user_chapter_progress')
         .select('last_read_at')
@@ -50,11 +62,16 @@ export async function GET(req: Request) {
         .order('last_read_at', { ascending: false })
         .limit(1)
         .maybeSingle(),
+      ctx.client
+        .from('user_settings')
+        .select('preferred_version_code')
+        .maybeSingle(),
     ]);
 
   if (chaptersRes.error) return jsonError(500, chaptersRes.error.message);
   if (versesRes.error) return jsonError(500, versesRes.error.message);
   if (daysRes.error) return jsonError(500, daysRes.error.message);
+  if (activeDaysRes.error) return jsonError(500, activeDaysRes.error.message);
   if (recentRes.error) return jsonError(500, recentRes.error.message);
   if (allProgressRes.error) return jsonError(500, allProgressRes.error.message);
   if (chaptersForBooksRes.error) return jsonError(500, chaptersForBooksRes.error.message);
@@ -161,6 +178,47 @@ export async function GET(req: Request) {
     }
   }
 
+  // Logros adicionales: requieren la versión preferida del usuario.
+  const preferredVersion = ((settingsRes.data ?? null) as { preferred_version_code?: string } | null)
+    ?.preferred_version_code || 'rv1960';
+
+  // Salmista — capítulos leídos de Salmos en la versión preferida vs total del libro.
+  const psalmsBookRes = await ctx.client
+    .from('bible_books')
+    .select('chapter_count')
+    .eq('version_code', preferredVersion)
+    .eq('slug', 'salmos')
+    .maybeSingle();
+  const psalmsTotalChapters = (psalmsBookRes.data as { chapter_count?: number } | null)?.chapter_count ?? 150;
+
+  const psalmsReadRes = await ctx.client
+    .from('user_chapter_progress')
+    .select('*', { head: true, count: 'exact' })
+    .eq('version_code', preferredVersion)
+    .eq('book_slug', 'salmos');
+  const psalmsCompleted = (psalmsReadRes.count ?? 0) >= psalmsTotalChapters;
+
+  // Nuevo Testamento — capítulos leídos vs total de NT en la versión preferida.
+  const ntBooksRes = await ctx.client
+    .from('bible_books')
+    .select('slug, chapter_count')
+    .eq('version_code', preferredVersion)
+    .eq('testament', 'new');
+  const ntBooks = (ntBooksRes.data ?? []) as Array<{ slug: string; chapter_count: number }>;
+  const ntTotalChapters = ntBooks.reduce((sum, b) => sum + (b.chapter_count || 0), 0);
+  const ntSlugs = ntBooks.map((b) => b.slug);
+
+  let ntReadCount = 0;
+  if (ntSlugs.length > 0) {
+    const ntReadRes = await ctx.client
+      .from('user_chapter_progress')
+      .select('*', { head: true, count: 'exact' })
+      .eq('version_code', preferredVersion)
+      .in('book_slug', ntSlugs);
+    ntReadCount = ntReadRes.count ?? 0;
+  }
+  const ntCompleted = ntTotalChapters > 0 && ntReadCount >= ntTotalChapters;
+
   return jsonOk(
     {
       chapters_read: chaptersRes.count ?? 0,
@@ -172,6 +230,10 @@ export async function GET(req: Request) {
       has_read_today: hasReadToday,
       books_progress: booksProgress,
       next_reading,
+      // Datos adicionales para alimentar los 8 logros (paridad con la web):
+      active_days: activeDaysRes.count ?? 0,
+      psalms_completed: psalmsCompleted,
+      nt_completed: ntCompleted,
     },
     { headers: corsHeaders }
   );
